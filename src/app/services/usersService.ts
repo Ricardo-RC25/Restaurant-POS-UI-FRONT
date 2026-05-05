@@ -47,6 +47,10 @@ interface UpdateUserResponse {
   message: string;
 }
 
+interface DeleteUserResponse {
+  message: string;
+}
+
 export const usersService = {
   /**
    * Obtener todos los usuarios
@@ -75,6 +79,16 @@ export const usersService = {
     console.log('📡 [API] Actualizando usuario:', { id, data });
     const response = await apiClient.put<UpdateUserResponse>(`/users/${id}`, data);
     console.log('✅ [API] Usuario actualizado:', response);
+    return response;
+  },
+
+  /**
+   * Eliminar un usuario
+   */
+  async deleteUser(id: string): Promise<DeleteUserResponse> {
+    console.log('📡 [API] Eliminando usuario:', id);
+    const response = await apiClient.delete<DeleteUserResponse>(`/users/${id}`);
+    console.log('✅ [API] Usuario eliminado:', response);
     return response;
   },
 };

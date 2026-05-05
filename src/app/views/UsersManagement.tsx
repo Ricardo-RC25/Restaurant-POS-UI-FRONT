@@ -85,12 +85,12 @@ export function UsersManagement() {
     setShowDeleteModal(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (userToDelete) {
-      deleteUser(userToDelete.id);
+      await deleteUser(userToDelete.id);
       setUserToDelete(null);
       setShowDeleteModal(false);
-      
+
       // Disparar evento para que el Login se actualice
       window.dispatchEvent(new Event('usersUpdated'));
     }

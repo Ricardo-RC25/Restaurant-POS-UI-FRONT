@@ -83,7 +83,7 @@ interface AppContextType {
   logout: () => void;
   addUser: (userData: Omit<User, 'id' | 'createdAt'>) => Promise<void>;
   updateUser: (id: string, updates: Partial<User>) => Promise<void>;
-  deleteUser: (id: string) => void;
+  deleteUser: (id: string) => Promise<void>;
   addNotification: (notification: Omit<Notification, 'id' | 'createdAt'>) => void;
   markNotificationAsRead: (id: string) => void;
   clearAllNotifications: () => void;
@@ -985,22 +985,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const deleteUser = (id: string) => {
+  const deleteUser = async (id: string) => {
     const user = users.find(u => u.id === id);
-    setUsers(users.filter(user => user.id !== id));
-    toast.success('Usuario eliminado');
 
-    if (currentUser && user) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'delete',
-        module: 'users',
-        entityType: 'user',
-        entityId: id,
-        details: `Usuario eliminado: ${user.name}`,
-      });
+    try {
+      await usersService.deleteUser(id);
+      setUsers(users.filter(user => user.id !== id));
+      toast.success('Usuario eliminado');
+
+      if (currentUser && user) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'delete',
+          module: 'users',
+          entityType: 'user',
+          entityId: id,
+          details: `Usuario eliminado: ${user.name}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error al eliminar usuario:', error);
+      toast.error('Error al eliminar el usuario. Intenta nuevamente.');
     }
   };
 
