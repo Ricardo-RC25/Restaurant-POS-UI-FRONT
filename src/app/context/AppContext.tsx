@@ -3,6 +3,7 @@ import { MenuItem, Order, Table, User, Notification, Category, AuditLog, CashReg
 import { toast } from 'sonner';
 import { initialUsers } from '../data/initialUsers';
 import { tablesService } from '../services/tablesService';
+import { usersService } from '../services/usersService';
 
 export interface AccessibilitySettings {
   darkMode: boolean;
@@ -80,7 +81,7 @@ interface AppContextType {
   deleteTable: (id: string) => Promise<void>;
   login: (username: string, password: string) => boolean;
   logout: () => void;
-  addUser: (userData: Omit<User, 'id' | 'createdAt'>) => void;
+  addUser: (userData: Omit<User, 'id' | 'createdAt'>) => Promise<void>;
   updateUser: (id: string, updates: Partial<User>) => void;
   deleteUser: (id: string) => void;
   addNotification: (notification: Omit<Notification, 'id' | 'createdAt'>) => void;
@@ -838,26 +839,56 @@ export function AppProvider({ children }: { children: ReactNode }) {
     toast.success('Sesión cerrada');
   };
 
-  const addUser = (userData: Omit<User, 'id' | 'createdAt'>) => {
-    const newUser: User = {
-      ...userData,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-    };
-    setUsers([...users, newUser]);
-    toast.success(`Usuario ${newUser.name} agregado`);
+  const addUser = async (userData: Omit<User, 'id' | 'createdAt'>) => {
+    try {
+      console.log('👤 [addUser] Creando usuario en API:', userData);
 
-    if (currentUser) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'create',
-        module: 'users',
-        entityType: 'user',
-        entityId: newUser.id,
-        details: `Rol: ${newUser.role}, Email: ${newUser.email}`,
+      // Llamar a la API para crear el usuario
+      const response = await usersService.createUser({
+        username: userData.username,
+        password: userData.password,
+        name: userData.name,
+        role: userData.role,
+        email: userData.email,
+        phone: userData.phone,
+        created_by: currentUser?.id || null,
       });
+
+      // Crear el objeto de usuario con el ID del backend
+      const newUser: User = {
+        id: response.user.id,
+        username: userData.username,
+        password: userData.password,
+        name: userData.name,
+        role: userData.role,
+        email: userData.email,
+        phone: userData.phone,
+        active: true,
+        createdAt: new Date(),
+      };
+
+      // Actualizar el estado local
+      setUsers([...users, newUser]);
+      toast.success(`Usuario ${newUser.name} agregado`);
+
+      if (currentUser) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'create',
+          module: 'users',
+          entityType: 'user',
+          entityId: newUser.id,
+          details: `Rol: ${newUser.role}, Email: ${newUser.email}`,
+        });
+      }
+
+      console.log('✅ [addUser] Usuario creado exitosamente:', newUser);
+    } catch (error) {
+      console.error('❌ [addUser] Error al crear usuario:', error);
+      toast.error('Error al crear el usuario. Intenta nuevamente.');
+      throw error;
     }
   };
 

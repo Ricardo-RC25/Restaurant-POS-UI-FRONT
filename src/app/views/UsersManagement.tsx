@@ -37,16 +37,19 @@ export function UsersManagement() {
   );
 
   // Handlers
-  const handleAddUser = (userData: NewUserData) => {
+  const handleAddUser = async (userData: Omit<User, 'id' | 'active' | 'createdAt'>) => {
     // La API se encargará de crear el ID y otros campos
-    addUser({
+    await addUser({
       username: userData.username,
       password: userData.password,
       name: userData.name,
       role: userData.role,
+      email: userData.email,
+      phone: userData.phone,
+      active: true,
     });
     setShowAddUserModal(false);
-    
+
     // Disparar evento para que el Login se actualice
     window.dispatchEvent(new Event('usersUpdated'));
   };
