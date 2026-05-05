@@ -77,7 +77,7 @@ interface AppContextType {
   deleteOrder: (id: string) => void;
   updateTable: (tableNumber: number, updates: Partial<Table>) => void;
   addTable: (table: Omit<Table, 'id'>) => Promise<void>;
-  deleteTable: (tableNumber: number) => void;
+  deleteTable: (id: string) => Promise<void>;
   login: (username: string, password: string) => boolean;
   logout: () => void;
   addUser: (userData: Omit<User, 'id' | 'createdAt'>) => void;
@@ -724,22 +724,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const deleteTable = (tableNumber: number) => {
-    const table = tables.find(t => t.number === tableNumber);
-    setTables(tables.filter(table => table.number !== tableNumber));
-    toast.success(`Mesa ${tableNumber} eliminada`);
+  const deleteTable = async (id: string) => {
+    try {
+      const table = tables.find(t => t.id === id);
 
-    if (currentUser && table) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'delete',
-        module: 'tables',
-        entityType: 'table',
-        entityId: table.id,
-        details: `Mesa ${tableNumber}`,
-      });
+      console.log('🗑️ [deleteTable] Eliminando mesa de API:', { id, tableNumber: table?.number });
+
+      // Llamar a la API para eliminar la mesa
+      await tablesService.deleteTable(id);
+
+      // Actualizar el estado local
+      setTables(tables.filter(t => t.id !== id));
+      toast.success(`Mesa ${table?.number} eliminada`);
+
+      if (currentUser && table) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'delete',
+          module: 'tables',
+          entityType: 'table',
+          entityId: table.id,
+          details: `Mesa ${table.number}`,
+        });
+      }
+
+      console.log('✅ [deleteTable] Mesa eliminada exitosamente');
+    } catch (error) {
+      console.error('❌ [deleteTable] Error al eliminar mesa:', error);
+      toast.error('Error al eliminar la mesa. Intenta nuevamente.');
+      throw error;
     }
   };
 

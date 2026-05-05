@@ -14,6 +14,10 @@ interface CreateTableResponse {
   tableId: string;
 }
 
+interface DeleteTableResponse {
+  message: string;
+}
+
 interface TableApiResponse {
   id: string;
   number: number;
@@ -42,6 +46,16 @@ export const tablesService = {
     console.log('📡 [API] Creando mesa:', data);
     const response = await apiClient.post<CreateTableResponse>('/tables', data);
     console.log('✅ [API] Mesa creada:', response);
+    return response;
+  },
+
+  /**
+   * Eliminar una mesa
+   */
+  async deleteTable(id: string): Promise<DeleteTableResponse> {
+    console.log('📡 [API] Eliminando mesa:', id);
+    const response = await apiClient.delete<DeleteTableResponse>(`/tables/${id}`);
+    console.log('✅ [API] Mesa eliminada:', response);
     return response;
   },
 };

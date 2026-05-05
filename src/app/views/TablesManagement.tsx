@@ -26,7 +26,7 @@ export function TablesManagement() {
   const [showEditTableModal, setShowEditTableModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedTable, setSelectedTable] = useState<{ number: number; status: string } | null>(null);
-  const [tableToDelete, setTableToDelete] = useState<{ number: number } | null>(null);
+  const [tableToDelete, setTableToDelete] = useState<{ id: string; number: number } | null>(null);
 
   // Estados derivados
   const existingTableNumbers = tables.map(t => t.number);
@@ -73,14 +73,14 @@ export function TablesManagement() {
     setSelectedTable(null);
   };
 
-  const handleDeleteClick = (table: { number: number }) => {
+  const handleDeleteClick = (table: { id: string; number: number }) => {
     setTableToDelete(table);
     setShowDeleteModal(true);
   };
 
   const handleConfirmDelete = async () => {
     if (tableToDelete) {
-      await deleteTable(tableToDelete.number);
+      await deleteTable(tableToDelete.id);
       setTableToDelete(null);
       setShowDeleteModal(false);
     }
@@ -186,7 +186,7 @@ export function TablesManagement() {
                         />
                         <IconButton
                           icon={Trash2}
-                          onClick={() => handleDeleteClick({ number: table.number })}
+                          onClick={() => handleDeleteClick({ id: table.id, number: table.number })}
                           variant="delete"
                           title="Eliminar"
                         />
