@@ -75,7 +75,7 @@ interface AppContextType {
   addOrder: (order: Order) => void;
   updateOrder: (id: string, updates: Partial<Order>) => void;
   deleteOrder: (id: string) => void;
-  updateTable: (tableNumber: number, updates: Partial<Table>) => void;
+  updateTable: (tableNumber: number, updates: Partial<Table>) => Promise<void>;
   addTable: (table: Omit<Table, 'id'>) => Promise<void>;
   deleteTable: (id: string) => Promise<void>;
   login: (username: string, password: string) => boolean;
@@ -677,10 +677,47 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setOrders(orders.filter(order => order.id !== id));
   };
 
-  const updateTable = (tableNumber: number, updates: Partial<Table>) => {
-    setTables(tables.map(table =>
-      table.number === tableNumber ? { ...table, ...updates } : table
-    ));
+  const updateTable = async (tableNumber: number, updates: Partial<Table>) => {
+    try {
+      const table = tables.find(t => t.number === tableNumber);
+      if (!table) {
+        console.error('❌ [updateTable] Mesa no encontrada:', tableNumber);
+        return;
+      }
+
+      console.log('✏️ [updateTable] Actualizando mesa:', { tableNumber, updates });
+
+      // Preparar datos para la API (solo campos que deben persistirse)
+      const apiData: any = {};
+
+      if (updates.number !== undefined) apiData.number = updates.number;
+      if (updates.capacity !== undefined) apiData.capacity = updates.capacity;
+      if (updates.status !== undefined) apiData.status = updates.status;
+      if (updates.waiterId !== undefined) apiData.waiter_id = updates.waiterId;
+      if (updates.occupiedAt !== undefined) {
+        apiData.occupied_at = updates.occupiedAt
+          ? updates.occupiedAt.toISOString().slice(0, 19).replace('T', ' ')
+          : null;
+      }
+
+      // Solo llamar a la API si hay campos que persistir
+      if (Object.keys(apiData).length > 0) {
+        await tablesService.updateTable(table.id, apiData);
+      }
+
+      // Actualizar estado local
+      setTables(tables.map(t =>
+        t.number === tableNumber ? { ...t, ...updates } : t
+      ));
+
+      console.log('✅ [updateTable] Mesa actualizada exitosamente');
+    } catch (error) {
+      console.error('❌ [updateTable] Error al actualizar mesa:', error);
+      // Aún así actualizar el estado local para estados temporales
+      setTables(tables.map(table =>
+        table.number === tableNumber ? { ...table, ...updates } : table
+      ));
+    }
   };
 
   const addTable = async (table: Omit<Table, 'id'>) => {

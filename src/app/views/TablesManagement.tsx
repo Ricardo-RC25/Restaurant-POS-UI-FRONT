@@ -59,14 +59,14 @@ export function TablesManagement() {
     setShowEditTableModal(true);
   };
 
-  const handleSaveEditTable = (oldNumber: number, newNumber: number) => {
+  const handleSaveEditTable = async (oldNumber: number, newNumber: number) => {
     if (oldNumber !== newNumber) {
       // Verificar que el nuevo número no exista
       if (existingTableNumbers.includes(newNumber)) {
         toast.error(`La mesa ${newNumber} ya existe`);
         return;
       }
-      updateTable(oldNumber, { number: newNumber });
+      await updateTable(oldNumber, { number: newNumber });
       toast.success(`Mesa ${oldNumber} actualizada a Mesa ${newNumber}`);
     }
     setShowEditTableModal(false);
