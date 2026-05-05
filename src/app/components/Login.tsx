@@ -17,54 +17,20 @@ const DEFAULT_LOGO = 'https://images.unsplash.com/photo-1722875183792-bebac14859
 
 export function Login() {
   // Context
-  const { login, users } = useApp();
-  
+  const { login } = useApp();
+
   // Estados
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showQuickAccess, setShowQuickAccess] = useState(true);
 
   // Estados derivados
   const logoUrl = localStorage.getItem('taqueriaLogoUrl') || DEFAULT_LOGO;
   const restaurantName = localStorage.getItem('restaurantName') || 'Taquería POS';
-  const availableUsers = users.filter(u => u.active);
 
   // Handlers
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await login(username, password);
-  };
-
-  const handleQuickLogin = async (user: any) => {
-    await login(user.username, user.password);
-  };
-
-  const handleResetUsers = () => {
-    if (confirm('¿Deseas resetear los usuarios a los valores iniciales? Esto borrará todos los usuarios personalizados.')) {
-      localStorage.removeItem('pos_users');
-      window.location.reload();
-    }
-  };
-
-  // Funciones auxiliares
-  const getRoleLabel = (role: string) => {
-    const labels = {
-      waiter: 'Mesero',
-      cashier: 'Cajero',
-      manager: 'Gerente',
-      admin: 'Administrador',
-    };
-    return labels[role as keyof typeof labels];
-  };
-
-  const getRoleColor = (role: string) => {
-    const colors = {
-      waiter: 'bg-blue-100 text-blue-800',
-      cashier: 'bg-green-100 text-green-800',
-      manager: 'bg-purple-100 text-purple-800',
-      admin: 'bg-red-100 text-red-800',
-    };
-    return colors[role as keyof typeof colors];
   };
 
   // Render
@@ -124,49 +90,6 @@ export function Login() {
             </button>
           </form>
         </div>
-
-        {/* Acceso Rápido (para demostración) */}
-        {showQuickAccess && (
-          <div className="mt-6 bg-card rounded-lg shadow-lg p-6 border border-border">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-medium text-card-foreground">Acceso Rápido (Demo)</h3>
-              <button
-                onClick={() => setShowQuickAccess(false)}
-                className="text-sm text-muted-foreground hover:text-card-foreground"
-              >
-                Ocultar
-              </button>
-            </div>
-            <div className="space-y-2">
-              {availableUsers.map((user) => (
-                <button
-                  key={user.id}
-                  onClick={() => handleQuickLogin(user)}
-                  className="w-full text-left p-3 rounded-lg border border-border hover:border-primary hover:bg-primary/10 transition-colors"
-                >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium text-card-foreground">{user.name}</p>
-                      <p className="text-sm text-muted-foreground">@{user.username}</p>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
-                      {getRoleLabel(user.role)}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-4 text-center">
-              admin: "admin123" | cajero: "cajero123" | mesero: "mesero123"
-            </p>
-            <button
-              onClick={handleResetUsers}
-              className="w-full mt-3 text-xs text-red-600 hover:text-red-800 underline"
-            >
-              Resetear usuarios a valores iniciales
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
