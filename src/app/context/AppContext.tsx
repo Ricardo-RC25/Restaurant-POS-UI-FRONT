@@ -687,14 +687,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       console.log('✏️ [updateTable] Actualizando mesa:', { tableNumber, updates });
 
-      // Preparar datos para la API (solo campos que deben persistirse)
+      // Preparar datos para la API (SOLO campos que se están actualizando explícitamente)
       const apiData: any = {};
 
-      if (updates.number !== undefined) apiData.number = updates.number;
-      if (updates.capacity !== undefined) apiData.capacity = updates.capacity;
-      if (updates.status !== undefined) apiData.status = updates.status;
-      if (updates.waiterId !== undefined) apiData.waiter_id = updates.waiterId;
-      if (updates.occupiedAt !== undefined) {
+      // Solo agregar campos si están presentes en updates
+      if ('number' in updates && updates.number !== undefined) {
+        apiData.number = updates.number;
+      }
+      if ('capacity' in updates && updates.capacity !== undefined) {
+        apiData.capacity = updates.capacity;
+      }
+      if ('status' in updates && updates.status !== undefined) {
+        apiData.status = updates.status;
+      }
+      if ('waiterId' in updates) {
+        apiData.waiter_id = updates.waiterId || null;
+      }
+      if ('occupiedAt' in updates) {
         apiData.occupied_at = updates.occupiedAt
           ? updates.occupiedAt.toISOString().slice(0, 19).replace('T', ' ')
           : null;
@@ -702,6 +711,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       // Solo llamar a la API si hay campos que persistir
       if (Object.keys(apiData).length > 0) {
+        console.log('📤 [updateTable] Enviando a API:', apiData);
         await tablesService.updateTable(table.id, apiData);
       }
 
