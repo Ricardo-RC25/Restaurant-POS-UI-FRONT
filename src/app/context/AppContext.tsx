@@ -195,7 +195,7 @@ const loadTablesFromLocalStorage = (): Table[] => {
   return [];
 };
 
-const loadUsers = (): User[] => {
+const loadUsersFromLocalStorage = (): User[] => {
   const stored = localStorage.getItem('pos_users');
 
   if (stored) {
@@ -207,7 +207,7 @@ const loadUsers = (): User[] => {
       }));
       return usersData;
     } catch (error) {
-      console.error('Error loading users:', error);
+      console.error('Error loading users from localStorage:', error);
       localStorage.setItem('pos_users', JSON.stringify(initialUsers));
       return initialUsers;
     }
@@ -351,7 +351,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>(loadCategories);
   const [orders, setOrders] = useState<Order[]>(loadOrders);
   const [tables, setTables] = useState<Table[]>([]);
-  const [users, setUsers] = useState<User[]>(loadUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(loadCurrentUser);
   const [notifications, setNotifications] = useState<Notification[]>(loadNotifications);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(loadAuditLogs);
@@ -396,6 +396,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
 
     fetchTables();
+  }, []);
+
+  // Cargar usuarios desde la API al iniciar
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        console.log('🔄 [AppContext] Cargando usuarios desde API...');
+        const apiUsers = await usersService.getUsers();
+
+        // Mapear de snake_case a camelCase y convertir tipos
+        const mappedUsers: User[] = apiUsers.map(user => ({
+          id: user.id,
+          username: user.username,
+          password: '', // No se devuelve por seguridad
+          name: user.name,
+          email: user.email || undefined,
+          phone: user.phone || undefined,
+          role: user.role,
+          active: user.active === 1,
+          createdAt: new Date(user.created_at),
+        }));
+
+        console.log('✅ [AppContext] Usuarios cargados desde API:', mappedUsers);
+        setUsers(mappedUsers);
+
+        // Guardar en localStorage como cache
+        localStorage.setItem('pos_users', JSON.stringify(mappedUsers));
+      } catch (error) {
+        console.error('❌ [AppContext] Error al cargar usuarios desde API, usando localStorage:', error);
+        // Si falla la API, cargar desde localStorage como respaldo
+        const localUsers = loadUsersFromLocalStorage();
+        setUsers(localUsers);
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   // Load accessibility settings when user changes

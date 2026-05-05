@@ -23,7 +23,28 @@ interface CreateUserResponse {
   };
 }
 
+interface UserApiResponse {
+  id: string;
+  username: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  role: 'admin' | 'manager' | 'waiter' | 'cashier';
+  active: number;
+  created_at: string;
+}
+
 export const usersService = {
+  /**
+   * Obtener todos los usuarios
+   */
+  async getUsers(): Promise<UserApiResponse[]> {
+    console.log('📡 [API] Obteniendo todos los usuarios');
+    const response = await apiClient.get<UserApiResponse[]>('/users');
+    console.log('✅ [API] Usuarios obtenidos:', response);
+    return response;
+  },
+
   /**
    * Crear un nuevo usuario
    */
