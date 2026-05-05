@@ -175,7 +175,7 @@ const loadOrders = (): Order[] => {
   return [];
 };
 
-const loadTables = (): Table[] => {
+const loadTablesFromLocalStorage = (): Table[] => {
   const stored = localStorage.getItem('pos_tables');
   if (stored) {
     try {
@@ -187,7 +187,7 @@ const loadTables = (): Table[] => {
         occupiedAt: table.occupiedAt ? new Date(table.occupiedAt) : undefined,
       }));
     } catch (error) {
-      console.error('Error loading tables:', error);
+      console.error('Error loading tables from localStorage:', error);
       return [];
     }
   }
@@ -349,7 +349,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>(loadMenuItems);
   const [categories, setCategories] = useState<Category[]>(loadCategories);
   const [orders, setOrders] = useState<Order[]>(loadOrders);
-  const [tables, setTables] = useState<Table[]>(loadTables);
+  const [tables, setTables] = useState<Table[]>([]);
   const [users, setUsers] = useState<User[]>(loadUsers);
   const [currentUser, setCurrentUser] = useState<User | null>(loadCurrentUser);
   const [notifications, setNotifications] = useState<Notification[]>(loadNotifications);
@@ -360,6 +360,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [extras, setExtras] = useState<Extra[]>(loadExtras);
   const [categoryExtras, setCategoryExtras] = useState<Map<string, string[]>>(loadCategoryExtras);
   const [productExtras, setProductExtras] = useState<Map<string, string[]>>(loadProductExtras);
+
+  // Cargar mesas desde la API al iniciar
+  useEffect(() => {
+    const fetchTables = async () => {
+      try {
+        console.log('🔄 [AppContext] Cargando mesas desde API...');
+        const apiTables = await tablesService.getTables();
+
+        // Mapear de snake_case a camelCase y convertir tipos
+        const mappedTables: Table[] = apiTables.map(table => ({
+          id: table.id,
+          number: table.number,
+          status: table.status,
+          capacity: 4, // Valor por defecto (no viene de la API)
+          currentOrder: null,
+          currentOrderId: table.current_order_id,
+          waiterId: table.waiter_id,
+          waiterName: undefined, // Se llenará dinámicamente
+          occupiedAt: table.occupied_at ? new Date(table.occupied_at) : undefined,
+        }));
+
+        console.log('✅ [AppContext] Mesas cargadas desde API:', mappedTables);
+        setTables(mappedTables);
+
+        // Guardar en localStorage como cache
+        localStorage.setItem('pos_tables', JSON.stringify(mappedTables));
+      } catch (error) {
+        console.error('❌ [AppContext] Error al cargar mesas desde API, usando localStorage:', error);
+        // Si falla la API, cargar desde localStorage como respaldo
+        const localTables = loadTablesFromLocalStorage();
+        setTables(localTables);
+      }
+    };
+
+    fetchTables();
+  }, []);
 
   // Load accessibility settings when user changes
   useEffect(() => {
