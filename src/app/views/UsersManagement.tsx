@@ -59,23 +59,23 @@ export function UsersManagement() {
     setShowEditUserModal(true);
   };
 
-  const handleSaveEditUser = (userId: string, userData: EditUserData) => {
+  const handleSaveEditUser = async (userId: string, userData: EditUserData) => {
     const updates: Partial<User> = {
       username: userData.username,
       name: userData.name,
       role: userData.role as 'admin' | 'manager' | 'waiter' | 'cashier',
       active: userData.active,
     };
-    
+
     // Incluir contraseña solo si se proporcionó
     if (userData.password) {
       updates.password = userData.password;
     }
-    
-    updateUser(userId, updates);
+
+    await updateUser(userId, updates);
     setShowEditUserModal(false);
     setSelectedUser(null);
-    
+
     // Disparar evento para que el Login se actualice
     window.dispatchEvent(new Event('usersUpdated'));
   };

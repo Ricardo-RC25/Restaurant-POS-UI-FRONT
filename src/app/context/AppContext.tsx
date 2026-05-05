@@ -82,7 +82,7 @@ interface AppContextType {
   login: (username: string, password: string) => boolean;
   logout: () => void;
   addUser: (userData: Omit<User, 'id' | 'createdAt'>) => Promise<void>;
-  updateUser: (id: string, updates: Partial<User>) => void;
+  updateUser: (id: string, updates: Partial<User>) => Promise<void>;
   deleteUser: (id: string) => void;
   addNotification: (notification: Omit<Notification, 'id' | 'createdAt'>) => void;
   markNotificationAsRead: (id: string) => void;
@@ -928,24 +928,60 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updateUser = (id: string, updates: Partial<User>) => {
-    const user = users.find(u => u.id === id);
-    setUsers(users.map(user =>
-      user.id === id ? { ...user, ...updates } : user
-    ));
-    toast.success('Usuario actualizado');
+  const updateUser = async (id: string, updates: Partial<User>) => {
+    try {
+      const user = users.find(u => u.id === id);
+      if (!user) {
+        console.error('❌ [updateUser] Usuario no encontrado:', id);
+        return;
+      }
 
-    if (currentUser && user) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'update',
-        module: 'users',
-        entityType: 'user',
-        entityId: id,
-        details: `Usuario: ${user.name}, Campos: ${Object.keys(updates).join(', ')}`,
-      });
+      console.log('✏️ [updateUser] Actualizando usuario:', { id, updates });
+
+      // Crear el objeto actualizado completo (combinar estado actual con updates)
+      const updatedUser = { ...user, ...updates };
+
+      // Preparar datos para la API con TODOS los campos
+      const apiData: any = {
+        username: updatedUser.username,
+        name: updatedUser.name,
+        email: updatedUser.email || null,
+        phone: updatedUser.phone || null,
+        role: updatedUser.role,
+        active: updatedUser.active,
+      };
+
+      console.log('📤 [updateUser] Enviando a API:', apiData);
+      await usersService.updateUser(id, apiData);
+
+      // Actualizar estado local
+      setUsers(users.map(u =>
+        u.id === id ? updatedUser : u
+      ));
+
+      toast.success('Usuario actualizado');
+
+      if (currentUser) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'update',
+          module: 'users',
+          entityType: 'user',
+          entityId: id,
+          details: `Usuario: ${updatedUser.name}, Campos: ${Object.keys(updates).join(', ')}`,
+        });
+      }
+
+      console.log('✅ [updateUser] Usuario actualizado exitosamente');
+    } catch (error) {
+      console.error('❌ [updateUser] Error al actualizar usuario:', error);
+      toast.error('Error al actualizar el usuario. Intenta nuevamente.');
+      // Aún así actualizar el estado local
+      setUsers(users.map(user =>
+        user.id === id ? { ...user, ...updates } : user
+      ));
     }
   };
 
