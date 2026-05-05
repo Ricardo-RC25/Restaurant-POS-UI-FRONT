@@ -5,6 +5,7 @@ import { initialUsers } from '../data/initialUsers';
 import { tablesService } from '../services/tablesService';
 import { usersService } from '../services/usersService';
 import { authService } from '../services/authService';
+import { categoriesService } from '../services/categoriesService';
 
 export interface AccessibilitySettings {
   darkMode: boolean;
@@ -57,7 +58,7 @@ interface AppContextType {
   setMenuItems: (items: MenuItem[]) => void;
   categories: Category[];
   setCategories: (categories: Category[]) => void;
-  addCategory: (category: Category) => void;
+  addCategory: (category: Omit<Category, 'id' | 'productCount'>) => Promise<void>;
   updateCategory: (id: string, updates: Partial<Category>) => void;
   deleteCategory: (id: string) => void;
   orders: Order[];
@@ -433,6 +434,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
 
     fetchUsers();
+  }, []);
+
+  // Cargar categorías desde API al montar
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        console.log('🔄 [AppContext] Cargando categorías desde API...');
+        const apiCategories = await categoriesService.getCategories();
+
+        // Mapear de snake_case a camelCase y convertir tipos
+        const mappedCategories: Category[] = apiCategories.map(category => ({
+          id: category.id,
+          name: category.name,
+          description: category.description,
+          productCount: 0, // Se calculará dinámicamente
+          displayOrder: category.display_order,
+          active: category.active === 1,
+        }));
+
+        console.log('✅ [AppContext] Categorías cargadas desde API:', mappedCategories);
+        setCategories(mappedCategories);
+
+        // Guardar en localStorage como cache
+        localStorage.setItem('pos_categories', JSON.stringify(mappedCategories));
+      } catch (error) {
+        console.error('❌ [AppContext] Error al cargar categorías desde API, usando localStorage:', error);
+        // Si falla la API, cargar desde localStorage como respaldo
+        const localCategories = loadCategories();
+        setCategories(localCategories);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
   // Load accessibility settings when user changes
@@ -1070,21 +1104,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const addCategory = (category: Category) => {
-    setCategories([...categories, category]);
-    toast.success(`Categoría ${category.name} agregada`);
+  const addCategory = async (category: Omit<Category, 'id' | 'productCount'>) => {
+    try {
+      console.log('📂 [addCategory] Creando categoría en API:', category);
 
-    if (currentUser) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'create',
-        module: 'inventory',
-        entityType: 'category',
-        entityId: category.id,
-        details: `Categoría: ${category.name}`,
+      // Llamar a la API para crear la categoría
+      const response = await categoriesService.createCategory({
+        name: category.name,
+        description: category.description,
       });
+
+      // Crear el objeto Category completo con los datos de la API
+      const newCategory: Category = {
+        id: response.category.id,
+        name: response.category.name,
+        description: response.category.description,
+        productCount: 0,
+        displayOrder: response.category.display_order,
+        active: response.category.active,
+      };
+
+      setCategories([...categories, newCategory]);
+      toast.success(`Categoría ${newCategory.name} agregada`);
+
+      if (currentUser) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'create',
+          module: 'inventory',
+          entityType: 'category',
+          entityId: newCategory.id,
+          details: `Categoría: ${newCategory.name}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error al crear categoría:', error);
+      toast.error('Error al crear la categoría. Intenta nuevamente.');
     }
   };
 

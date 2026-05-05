@@ -70,19 +70,15 @@ export function CategoriesView() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (editingCategory) {
       updateCategory(editingCategory.id, formData);
     } else {
-      const newCategory: Category = {
-        id: Date.now().toString(),
-        ...formData,
-      };
-      addCategory(newCategory);
+      await addCategory(formData);
     }
-    
+
     handleCloseModal();
   };
 
