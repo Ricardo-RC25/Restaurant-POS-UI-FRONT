@@ -30,8 +30,8 @@ export function DashboardLayout() {
     return <Login />;
   }
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 

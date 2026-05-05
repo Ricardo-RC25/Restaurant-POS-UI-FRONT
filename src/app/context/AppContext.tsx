@@ -81,7 +81,7 @@ interface AppContextType {
   addTable: (table: Omit<Table, 'id'>) => Promise<void>;
   deleteTable: (id: string) => Promise<void>;
   login: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   addUser: (userData: Omit<User, 'id' | 'createdAt'>) => Promise<void>;
   updateUser: (id: string, updates: Partial<User>) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
@@ -882,25 +882,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
-    if (currentUser) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'logout',
-        module: 'auth',
-        entityType: 'session',
-        entityId: currentUser.id,
-        details: `Usuario cerró sesión`,
-      });
+  const logout = async () => {
+    try {
+      // Llamar a la API para cerrar sesión
+      await authService.logout();
+
+      if (currentUser) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'logout',
+          module: 'auth',
+          entityType: 'session',
+          entityId: currentUser.id,
+          details: `Usuario cerró sesión`,
+        });
+      }
+
+      // Eliminar token de localStorage
+      localStorage.removeItem('auth_token');
+
+      setCurrentUser(null);
+      toast.success('Sesión cerrada');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      // Aún así cerrar sesión localmente
+      localStorage.removeItem('auth_token');
+      setCurrentUser(null);
+      toast.success('Sesión cerrada');
     }
-
-    // Eliminar token de localStorage
-    localStorage.removeItem('auth_token');
-
-    setCurrentUser(null);
-    toast.success('Sesión cerrada');
   };
 
   const addUser = async (userData: Omit<User, 'id' | 'createdAt'>) => {
