@@ -1,0 +1,472 @@
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+  --background: #f8f6f3;
+  --foreground: #2e2e2e;
+  --card: #ffffff;
+  --card-foreground: #2e2e2e;
+  --popover: #ffffff;
+  --popover-foreground: #2e2e2e;
+  --primary: #a2774c;
+  --primary-foreground: #ffffff;
+  --secondary: #2e636e;
+  --secondary-foreground: #ffffff;
+  --muted: #e8e4df;
+  --muted-foreground: #6c5033;
+  --accent: #6c5033;
+  --accent-foreground: #ffffff;
+  --destructive: #e74c3c;
+  --destructive-foreground: #ffffff;
+  --border: rgba(108, 80, 51, 0.15);
+  --input: transparent;
+  --input-background: #ffffff;
+  --switch-background: #cbced4;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: #a2774c;
+  --chart-1: #a2774c;
+  --chart-2: #2e636e;
+  --chart-3: #6c5033;
+  --chart-4: #e8e4df;
+  --chart-5: #f8f6f3;
+  --radius: 0.75rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #2e2e2e;
+  --sidebar-primary: #a2774c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f8f6f3;
+  --sidebar-accent-foreground: #2e2e2e;
+  --sidebar-border: rgba(108, 80, 51, 0.15);
+  --sidebar-ring: #a2774c;
+}
+
+/* Ultra-fast modal animations - optimized for instant feel */
+@keyframes modal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-slide {
+  from { transform: translate3d(0, 10px, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+.modal-overlay {
+  animation: modal-fade 100ms ease-out;
+}
+
+.modal-content {
+  animation: modal-fade 100ms ease-out, modal-slide 100ms ease-out;
+}
+
+.modal-content-mobile {
+  animation: modal-slide 120ms ease-out;
+}
+
+/* Remove all animations if reduced motion is preferred */
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .modal-content,
+  .modal-content-mobile {
+    animation: none !important;
+  }
+}
+
+/* Disable transitions during modal opening for instant feel */
+.modal-opening * {
+  transition: none !important;
+}
+
+/* Optimized smooth scroll for modal content */
+.modal-content,
+.modal-content-mobile {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.modal-content > div:first-child,
+.modal-content-mobile > div:first-child {
+  scroll-behavior: smooth;
+}
+
+/* Fast scroll optimization - disable GPU layers for scrollable content */
+.overflow-auto,
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  transform: translateZ(0);
+  will-change: scroll-position;
+}
+
+.dark {
+  --background: #1a1612;
+  --foreground: #f5f1ed;
+  --card: #2a2420;
+  --card-foreground: #f5f1ed;
+  --popover: #2a2420;
+  --popover-foreground: #f5f1ed;
+  --primary: #d4a574;
+  --primary-foreground: #1a1612;
+  --secondary: #3d7a88;
+  --secondary-foreground: #f5f1ed;
+  --muted: #3a3229;
+  --muted-foreground: #b8a591;
+  --accent: #8b6f47;
+  --accent-foreground: #f5f1ed;
+  --destructive: #e74c3c;
+  --destructive-foreground: #f5f1ed;
+  --border: rgba(212, 165, 116, 0.2);
+  --input: rgba(212, 165, 116, 0.1);
+  --input-background: #2a2420;
+  --switch-background: #4a4238;
+  --ring: #d4a574;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --chart-1: #d4a574;
+  --chart-2: #3d7a88;
+  --chart-3: #8b6f47;
+  --chart-4: #3a3229;
+  --chart-5: #2a2420;
+  --sidebar: #2a2420;
+  --sidebar-foreground: #f5f1ed;
+  --sidebar-primary: #d4a574;
+  --sidebar-primary-foreground: #1a1612;
+  --sidebar-accent: #3a3229;
+  --sidebar-accent-foreground: #f5f1ed;
+  --sidebar-border: rgba(212, 165, 116, 0.2);
+  --sidebar-ring: #d4a574;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    font-size: 14px;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /**
+  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
+  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
+  */
+
+  h1 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h2 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h4 {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  label {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  button {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  input {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    line-height: 1.5;
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    /* Reducir tamaño base de fuente para móviles */
+    html {
+      font-size: 14px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Ajustar tipografía para móviles */
+    h1 {
+      font-size: 1.5rem; /* ~21px */
+    }
+
+    h2 {
+      font-size: 1.25rem; /* ~17.5px */
+    }
+
+    h3 {
+      font-size: 1.125rem; /* ~15.75px */
+    }
+
+    h4 {
+      font-size: 1rem; /* ~14px */
+    }
+
+    body {
+      /* Prevent pull-to-refresh bounce */
+      overscroll-behavior-y: none;
+    }
+
+    /* Prevenir zoom en inputs (iOS requiere mínimo 16px) */
+    input, select, textarea {
+      font-size: 16px;
+    }
+
+    /* Better touch targets for mobile */
+    button, a, input, select, textarea {
+      touch-action: manipulation;
+    }
+
+    /* Prevent text selection on buttons */
+    button {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    /* Better scrolling for modals */
+    .modal-content {
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+  /* Ajustes adicionales para pantallas muy pequeñas */
+  @media (max-width: 480px) {
+    html {
+      font-size: 12px;
+    }
+
+    h1 {
+      font-size: 1.25rem; /* ~15px */
+    }
+
+    h2 {
+      font-size: 1.125rem; /* ~13.5px */
+    }
+
+    h3 {
+      font-size: 1rem; /* ~12px */
+    }
+
+    h4 {
+      font-size: 0.875rem; /* ~10.5px */
+    }
+  }
+
+  /* iOS safe area support */
+  @supports (padding: max(0px)) {
+    body {
+      padding-left: max(0px, env(safe-area-inset-left));
+      padding-right: max(0px, env(safe-area-inset-right));
+    }
+  }
+
+  /* Utility classes for touch */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .active\:scale-98:active {
+    transform: scale(0.98);
+  }
+
+  .active\:scale-95:active {
+    transform: scale(0.95);
+  }
+
+  /* Toast mobile positioning - Centradas y visibles */
+  @media (max-width: 768px) {
+    [data-sonner-toaster] {
+      position: fixed !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      bottom: auto !important;
+      right: auto !important;
+      width: calc(100% - 2rem) !important;
+      max-width: 380px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    [data-sonner-toast] {
+      margin-bottom: 0.5rem !important;
+      width: 100% !important;
+    }
+  }
+
+  /* Ensure toasts have proper z-index */
+  [data-sonner-toaster] {
+    z-index: 9999 !important;
+  }
+
+  /* Accessibility: High Contrast Mode */
+  .high-contrast {
+    --background: #ffffff;
+    --foreground: #000000;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --border: #000000;
+    --primary: #704214;
+    --primary-foreground: #ffffff;
+    --secondary: #1a4550;
+    --secondary-foreground: #ffffff;
+    --muted: #f0f0f0;
+    --muted-foreground: #000000;
+    --accent: #3d2817;
+    --accent-foreground: #ffffff;
+  }
+
+  .dark.high-contrast {
+    --background: #000000;
+    --foreground: #ffffff;
+    --card: #000000;
+    --card-foreground: #ffffff;
+    --border: #ffffff;
+    --primary: #ffcc80;
+    --primary-foreground: #000000;
+    --secondary: #80deea;
+    --secondary-foreground: #000000;
+    --muted: #1a1a1a;
+    --muted-foreground: #ffffff;
+    --accent: #ffab91;
+    --accent-foreground: #000000;
+  }
+
+  /* Accessibility: Reduced Motion */
+  .reduce-motion,
+  .reduce-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Accessibility: Increased Line Spacing */
+  .increased-spacing {
+    --line-height-multiplier: 1.8;
+  }
+
+  .increased-spacing h1,
+  .increased-spacing h2,
+  .increased-spacing h3,
+  .increased-spacing h4,
+  .increased-spacing p,
+  .increased-spacing label,
+  .increased-spacing button,
+  .increased-spacing input {
+    line-height: calc(1.5 * var(--line-height-multiplier, 1)) !important;
+  }
+
+  .increased-spacing * {
+    letter-spacing: 0.02em;
+  }
+
+  /* Custom Scrollbars - Modo Claro y Oscuro */
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(162, 119, 76, 0.5) transparent;
+  }
+
+  .dark * {
+    scrollbar-color: rgba(212, 165, 116, 0.5) transparent;
+  }
+
+  /* Webkit (Chrome, Safari, Edge) */
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(162, 119, 76, 0.5);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgba(162, 119, 76, 0.8);
+  }
+
+  /* Scrollbar en modo oscuro */
+  .dark *::-webkit-scrollbar-thumb {
+    background: rgba(212, 165, 116, 0.5);
+  }
+
+  .dark *::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 165, 116, 0.8);
+  }
+
+  /* Scrollbar para elementos específicos (modales, sidebars, etc.) */
+  .dark *::-webkit-scrollbar-track {
+    background: rgba(42, 36, 32, 0.3);
+  }
+}
