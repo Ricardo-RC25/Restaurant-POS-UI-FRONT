@@ -6,6 +6,7 @@ import { tablesService } from '../services/tablesService';
 import { usersService } from '../services/usersService';
 import { authService } from '../services/authService';
 import { categoriesService } from '../services/categoriesService';
+import { menuItemsService } from '../services/menuItemsService';
 
 export interface AccessibilitySettings {
   darkMode: boolean;
@@ -72,7 +73,7 @@ interface AppContextType {
   updateAccessibility: (settings: Partial<AccessibilitySettings>) => void;
   invoiceBanner: InvoiceBannerSettings;
   updateInvoiceBanner: (settings: Partial<InvoiceBannerSettings>) => void;
-  addMenuItem: (item: MenuItem) => void;
+  addMenuItem: (item: Omit<MenuItem, 'id' | 'createdAt'>) => Promise<void>;
   updateMenuItem: (id: string, updates: Partial<MenuItem>) => void;
   deleteMenuItem: (id: string) => void;
   addOrder: (order: Order) => void;
@@ -469,6 +470,54 @@ export function AppProvider({ children }: { children: ReactNode }) {
     fetchCategories();
   }, []);
 
+  // Cargar productos desde API al montar
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        console.log('🔄 [AppContext] Cargando productos desde API...');
+        const apiMenuItems = await menuItemsService.getMenuItems();
+
+        // Mapear de snake_case a camelCase y convertir tipos
+        const mappedMenuItems: MenuItem[] = apiMenuItems.map(item => {
+          // Buscar el nombre de la categoría
+          const category = categories.find(c => c.id === item.category_id);
+
+          return {
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            priceProvider: parseFloat(item.price_provider),
+            priceClient: parseFloat(item.price_client),
+            category: category?.name || 'Sin categoría',
+            categoryId: item.category_id,
+            stock: parseInt(item.stock),
+            minStock: parseInt(item.min_stock),
+            unit: 'pzs', // Valor por defecto (no viene de la API)
+            imageUrl: item.image ? `http://localhost:3000/uploads/${item.image}` : undefined,
+            active: item.active === 1,
+            createdAt: new Date(item.created_at),
+          };
+        });
+
+        console.log('✅ [AppContext] Productos cargados desde API:', mappedMenuItems);
+        setMenuItems(mappedMenuItems);
+
+        // Guardar en localStorage como cache
+        localStorage.setItem('pos_menu_items', JSON.stringify(mappedMenuItems));
+      } catch (error) {
+        console.error('❌ [AppContext] Error al cargar productos desde API, usando localStorage:', error);
+        // Si falla la API, cargar desde localStorage como respaldo
+        const localMenuItems = loadMenuItems();
+        setMenuItems(localMenuItems);
+      }
+    };
+
+    // Solo cargar productos después de que las categorías estén disponibles
+    if (categories.length > 0) {
+      fetchMenuItems();
+    }
+  }, [categories]);
+
   // Load accessibility settings when user changes
   useEffect(() => {
     const settings = loadAccessibilitySettings(currentUser);
@@ -650,21 +699,57 @@ export function AppProvider({ children }: { children: ReactNode }) {
     toast.success('Configuración del banner guardada');
   };
 
-  const addMenuItem = (item: MenuItem) => {
-    setMenuItems([...menuItems, item]);
-    toast.success(`Producto ${item.name} agregado`);
+  const addMenuItem = async (item: Omit<MenuItem, 'id' | 'createdAt'>) => {
+    try {
+      console.log('📦 [addMenuItem] Creando producto en API:', item);
 
-    if (currentUser) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'create',
-        module: 'inventory',
-        entityType: 'product',
-        entityId: item.id,
-        details: `Categoría: ${item.category}, Precio: $${item.priceClient}`,
+      // Llamar a la API para crear el producto
+      const response = await menuItemsService.createMenuItem({
+        name: item.name,
+        description: item.description,
+        category_id: item.categoryId,
+        price_provider: item.priceProvider,
+        price_client: item.priceClient,
+        stock: item.stock,
+        min_stock: item.minStock,
+        image: item.imageFile,
       });
+
+      // Crear el objeto MenuItem completo con los datos de la API
+      const newItem: MenuItem = {
+        id: response.item.id,
+        name: response.item.name,
+        description: response.item.description,
+        priceProvider: parseFloat(response.item.price_provider),
+        priceClient: parseFloat(response.item.price_client),
+        category: item.category, // Mantener el nombre de la categoría del frontend
+        categoryId: response.item.category_id,
+        stock: parseInt(response.item.stock),
+        minStock: parseInt(response.item.min_stock),
+        unit: item.unit,
+        imageUrl: response.item.image ? `http://localhost:3000/uploads/${response.item.image}` : undefined,
+        active: response.item.active,
+        createdAt: new Date(),
+      };
+
+      setMenuItems([...menuItems, newItem]);
+      toast.success(`Producto ${newItem.name} agregado`);
+
+      if (currentUser) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'create',
+          module: 'inventory',
+          entityType: 'product',
+          entityId: newItem.id,
+          details: `Categoría: ${newItem.category}, Precio: $${newItem.priceClient}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error al crear producto:', error);
+      toast.error('Error al crear el producto. Intenta nuevamente.');
     }
   };
 

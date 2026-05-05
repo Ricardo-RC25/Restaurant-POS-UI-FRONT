@@ -109,15 +109,15 @@ export function InventoryView() {
     setImageFile(null); // 🔥 Limpiar archivo
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // 🔥 Validar campos requeridos
     if (!formData.name || !formData.priceClient || !formData.priceProvider) {
       toast.error('Por favor completa todos los campos requeridos');
       return;
     }
-    
+
     // 🔥 Validar que se haya seleccionado una categoría
     if (!formData.categoryId) {
       toast.error('Por favor selecciona una categoría');
@@ -139,8 +139,7 @@ export function InventoryView() {
       });
       // No mostrar toast aquí - se muestra en el context después de llamar a la API
     } else {
-      const newItem: MenuItem = {
-        id: Date.now().toString(),
+      const newItem = {
         name: formData.name,
         description: formData.description,
         priceProvider: parseFloat(formData.priceProvider),
@@ -153,12 +152,11 @@ export function InventoryView() {
         active: formData.active,
         imageUrl: formData.imageUrl,
         imageFile: imageFile || undefined, // 🔥 Pasar el archivo File
-        createdAt: new Date(),
       };
-      addMenuItem(newItem);
+      await addMenuItem(newItem);
       // No mostrar toast aquí - se muestra en el context después de llamar a la API
     }
-    
+
     handleCloseModal();
   };
 
