@@ -59,7 +59,7 @@ interface AppContextType {
   categories: Category[];
   setCategories: (categories: Category[]) => void;
   addCategory: (category: Omit<Category, 'id' | 'productCount'>) => Promise<void>;
-  updateCategory: (id: string, updates: Partial<Category>) => void;
+  updateCategory: (id: string, updates: Partial<Category>) => Promise<void>;
   deleteCategory: (id: string) => void;
   orders: Order[];
   tables: Table[];
@@ -1145,24 +1145,51 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updateCategory = (id: string, updates: Partial<Category>) => {
+  const updateCategory = async (id: string, updates: Partial<Category>) => {
     const category = categories.find(c => c.id === id);
-    setCategories(categories.map(cat =>
-      cat.id === id ? { ...cat, ...updates } : cat
-    ));
-    toast.success('Categoría actualizada');
 
-    if (currentUser && category) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'update',
-        module: 'inventory',
-        entityType: 'category',
-        entityId: id,
-        details: `Categoría: ${category.name}, Campos: ${Object.keys(updates).join(', ')}`,
-      });
+    if (!category) {
+      toast.error('Categoría no encontrada');
+      return;
+    }
+
+    try {
+      // Combinar el estado actual con las actualizaciones
+      const updatedCategory = { ...category, ...updates };
+
+      // Enviar TODOS los campos a la API para evitar valores NULL
+      const apiData: any = {
+        name: updatedCategory.name,
+        description: updatedCategory.description,
+        active: updatedCategory.active,
+      };
+
+      await categoriesService.updateCategory(id, apiData);
+
+      setCategories(categories.map(cat =>
+        cat.id === id ? updatedCategory : cat
+      ));
+      toast.success('Categoría actualizada');
+
+      if (currentUser) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'update',
+          module: 'inventory',
+          entityType: 'category',
+          entityId: id,
+          details: `Categoría: ${category.name}, Campos: ${Object.keys(updates).join(', ')}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error al actualizar categoría:', error);
+      toast.error('Error al actualizar la categoría. Intenta nuevamente.');
+      // Aún así actualizar el estado local
+      setCategories(categories.map(cat =>
+        cat.id === id ? { ...cat, ...updates } : cat
+      ));
     }
   };
 

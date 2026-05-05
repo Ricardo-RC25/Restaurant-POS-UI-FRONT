@@ -74,7 +74,7 @@ export function CategoriesView() {
     e.preventDefault();
 
     if (editingCategory) {
-      updateCategory(editingCategory.id, formData);
+      await updateCategory(editingCategory.id, formData);
     } else {
       await addCategory(formData);
     }
