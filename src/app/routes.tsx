@@ -3,7 +3,6 @@ import { DashboardLayout } from './components/DashboardLayout';
 import { DashboardView } from './views/Dashboard';
 import { WaiterView } from './views/WaiterView';
 import { CashierView } from './views/CashierView';
-import { KitchenView } from './views/KitchenView';
 import { InventoryView } from './views/InventoryView';
 import { BackOfficeView } from './views/BackOffice';
 import { CategoriesView } from './views/CategoriesView';
@@ -29,7 +28,6 @@ export const router = createBrowserRouter([
       { index: true, element: <DashboardView /> },
       { path: 'waiter', element: <WaiterView /> },
       { path: 'cashier', element: <CashierView /> },
-      { path: 'kitchen', element: <KitchenView /> },
       { path: 'inventory', element: <InventoryView /> },
       { path: 'backoffice', element: <BackOfficeView /> },
       { path: 'categories', element: <CategoriesView /> },

@@ -119,7 +119,7 @@ export function UsersManagement() {
     <div className="h-full flex flex-col bg-[#f8f6f3] dark:bg-gray-950 overflow-hidden">
       {/* Header */}
       <PageHeader
-        breadcrumb="BACK OFFICE / USUARIOS"
+        breadcrumb="GESTIÓN / USUARIOS"
         title="Gestión de Usuarios"
         subtitle="Administrar empleados y permisos"
         actions={

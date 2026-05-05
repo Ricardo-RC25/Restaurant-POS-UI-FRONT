@@ -92,7 +92,7 @@ export function InvoicingView() {
   return (
     <div className="h-full flex flex-col bg-surface overflow-hidden">
       <PageHeader
-        breadcrumb="BACK OFFICE / FACTURACIÓN"
+        breadcrumb="GESTIÓN / FACTURACIÓN"
         title="Portal de Facturación"
         subtitle="Gestión de facturas electrónicas CFDI 4.0"
         actions={

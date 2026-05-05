@@ -18,7 +18,7 @@ import { DeleteConfirmationModal } from '../components/DeleteConfirmationModal';
 
 export function TablesManagement() {
   // Context
-  const { tables, addTable, deleteTable } = useApp();
+  const { tables, addTable, updateTable, deleteTable } = useApp();
   
   // Estados
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,17 +38,16 @@ export function TablesManagement() {
 
   // Handlers
   const handleAddTable = async (tableNumber: number) => {
-    // Crear objeto mesa con datos mínimos
+    // Crear objeto mesa con datos mínimos (sin id, se genera en el backend)
     const newTable = {
-      id: '', // Se genera en el backend
       number: tableNumber,
       capacity: 4, // Valor por defecto
       status: 'free' as const,
+      currentOrder: null,
       currentOrderId: null,
       waiterId: null,
       waiterName: undefined,
       occupiedAt: undefined,
-      active: true,
     };
 
     await addTable(newTable);
@@ -61,10 +60,17 @@ export function TablesManagement() {
   };
 
   const handleSaveEditTable = (oldNumber: number, newNumber: number) => {
-    toast.success(`Mesa ${oldNumber} actualizada a Mesa ${newNumber}`);
+    if (oldNumber !== newNumber) {
+      // Verificar que el nuevo número no exista
+      if (existingTableNumbers.includes(newNumber)) {
+        toast.error(`La mesa ${newNumber} ya existe`);
+        return;
+      }
+      updateTable(oldNumber, { number: newNumber });
+      toast.success(`Mesa ${oldNumber} actualizada a Mesa ${newNumber}`);
+    }
     setShowEditTableModal(false);
     setSelectedTable(null);
-    // Aquí se agregaría la lógica para actualizar la mesa
   };
 
   const handleDeleteClick = (table: { number: number }) => {
@@ -102,7 +108,7 @@ export function TablesManagement() {
   return (
     <div className="h-full flex flex-col bg-[#f8f6f3] dark:bg-gray-950 overflow-hidden">
       <PageHeader
-        breadcrumb="BACK OFFICE / MESAS"
+        breadcrumb="GESTIÓN / MESAS"
         title="Gestión de Mesas"
         subtitle="Configurar mesas del restaurante"
         actions={

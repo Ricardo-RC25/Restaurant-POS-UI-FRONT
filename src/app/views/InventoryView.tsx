@@ -173,7 +173,7 @@ export function InventoryView() {
   return (
     <div className="h-full flex flex-col bg-background overflow-hidden">
       <PageHeader
-        breadcrumb="BACK OFFICE / INVENTARIO"
+        breadcrumb="GESTIÓN / INVENTARIO"
         title="Inventario"
         subtitle="Gestión de productos del menú"
         actions={

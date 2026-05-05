@@ -26,7 +26,7 @@ export const ExtrasModal = memo(function ExtrasModal({ item, onConfirm, onClose 
 
       // Si es por categoría, verificar si el producto pertenece a una de las categorías
       if (extra.applicationType === 'category') {
-        const categoryExtraIds = categoryExtras.get(item.category) || [];
+        const categoryExtraIds = categoryExtras.get(item.categoryId) || [];
         return categoryExtraIds.includes(extra.id);
       }
 
@@ -38,7 +38,7 @@ export const ExtrasModal = memo(function ExtrasModal({ item, onConfirm, onClose 
 
       return false;
     });
-  }, [extras, categoryExtras, productExtras, item.category, item.id]);
+  }, [extras, categoryExtras, productExtras, item.categoryId, item.id]);
 
   const toggleExtra = useCallback((extra: { id: string; name: string; price: number }) => {
     setSelectedExtras(prev => {

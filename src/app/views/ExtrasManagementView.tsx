@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import { formatCurrency } from '../utils/format';
 
 export function ExtrasManagementView() {
-  const { extras, addExtra, updateExtra, deleteExtra } = useApp();
+  const { extras, addExtra, updateExtra, deleteExtra, categoryExtras, productExtras } = useApp();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -31,7 +31,32 @@ export function ExtrasManagementView() {
   };
 
   const handleEditExtra = (extra: any) => {
-    setSelectedExtra(extra);
+    // Buscar las categorías y productos asociados a este extra
+    const associatedCategoryIds: string[] = [];
+    const associatedProductIds: string[] = [];
+
+    // Buscar en categoryExtras
+    categoryExtras.forEach((extraIds, categoryId) => {
+      if (extraIds.includes(extra.id)) {
+        associatedCategoryIds.push(categoryId);
+      }
+    });
+
+    // Buscar en productExtras
+    productExtras.forEach((extraIds, productId) => {
+      if (extraIds.includes(extra.id)) {
+        associatedProductIds.push(productId);
+      }
+    });
+
+    // Crear el objeto con las relaciones
+    const extraWithRelations = {
+      ...extra,
+      categoryIds: associatedCategoryIds,
+      productIds: associatedProductIds,
+    };
+
+    setSelectedExtra(extraWithRelations);
     setShowModal(true);
   };
 
@@ -46,17 +71,27 @@ export function ExtrasManagementView() {
   const handleSaveExtra = async (extraData: any) => {
     if (selectedExtra) {
       // Editar extra existente
-      await updateExtra(selectedExtra.id, extraData);
+      await updateExtra(selectedExtra.id, {
+        name: extraData.name,
+        description: extraData.description || '',
+        price: extraData.price,
+        applicationType: extraData.applicationType,
+        active: extraData.active !== false,
+        categoryIds: extraData.categoryIds || [],
+        productIds: extraData.productIds || [],
+      });
     } else {
       // Crear nuevo extra
       await addExtra({
-        id: '', // El backend generará el ID
+        id: Date.now().toString(),
         name: extraData.name,
         description: extraData.description || '',
         price: extraData.price,
         applicationType: extraData.applicationType,
         active: extraData.active !== false,
         createdAt: new Date(),
+        categoryIds: extraData.categoryIds || [],
+        productIds: extraData.productIds || [],
       });
     }
     setShowModal(false);
@@ -91,7 +126,7 @@ export function ExtrasManagementView() {
   return (
     <div className="h-full flex flex-col bg-[#f8f6f3] dark:bg-gray-950 overflow-hidden">
       <PageHeader
-        breadcrumb="BACK OFFICE / EXTRAS"
+        breadcrumb="GESTIÓN / EXTRAS"
         title="Gestión de Extras"
         subtitle="Administra las modificaciones y extras disponibles"
         actions={

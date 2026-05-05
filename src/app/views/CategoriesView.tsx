@@ -102,7 +102,7 @@ export function CategoriesView() {
   return (
     <div className="h-full flex flex-col bg-background overflow-hidden">
       <PageHeader
-        breadcrumb="BACK OFFICE / CATEGORÍAS"
+        breadcrumb="GESTIÓN / CATEGORÍAS"
         title="Categorías"
         subtitle="Administra las categorías del menú"
         actions={

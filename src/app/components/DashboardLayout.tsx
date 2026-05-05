@@ -3,14 +3,13 @@ import { Outlet, useNavigate, useLocation } from 'react-router';
 import { useApp } from '../context/AppContext';
 import { Login } from './Login';
 import { Footer } from './Footer';
-import { 
-  LogOut, 
-  User, 
+import {
+  LogOut,
+  User,
   Home,
   ShoppingBag,
   DollarSign,
   Package,
-  ChefHat,
   Menu,
   X,
   Settings
@@ -50,9 +49,7 @@ export function DashboardLayout() {
     { path: '/', icon: Home, label: 'Dashboard', roles: ['admin', 'manager', 'cashier', 'waiter'] },
     { path: '/waiter', icon: ShoppingBag, label: 'Mesero', roles: ['admin', 'waiter', 'manager'] },
     { path: '/cashier', icon: DollarSign, label: 'Caja', roles: ['admin', 'cashier', 'manager'] },
-    { path: '/kitchen', icon: ChefHat, label: 'Cocina', roles: ['admin', 'manager', 'waiter'] },
-    { path: '/inventory', icon: Package, label: 'Inventario', roles: ['admin', 'manager'] },
-    { path: '/backoffice', icon: Home, label: 'Back Office', roles: ['admin', 'manager'] },
+    { path: '/backoffice', icon: Home, label: 'Gestión', roles: ['admin', 'manager'] },
     { path: '/settings', icon: Settings, label: 'Configuración', roles: ['admin', 'manager', 'cashier', 'waiter'] },
   ];
 

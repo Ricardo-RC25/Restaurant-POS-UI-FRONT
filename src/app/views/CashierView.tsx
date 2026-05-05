@@ -3,8 +3,15 @@ import { useApp } from '../context/AppContext';
 import { TicketModal } from '../components/TicketModal';
 import { CashRegisterModal } from '../components/CashRegisterModal';
 import { PageHeader } from '../components/PageHeader';
-import { Search, Eye, DollarSign, TrendingUp, Calculator, Receipt } from 'lucide-react';
+import { Search, Eye, Calculator, Receipt } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  PAYMENT_METHOD_LABELS,
+  PAYMENT_METHOD_ICONS,
+  ORDER_STATUS
+} from '../utils/constants';
+import { formatCurrency, formatTime } from '../utils/format';
+import { getTodayOrders } from '../utils/helpers';
 
 export function CashierView() {
   const { orders, currentUser, addCashRegister } = useApp();
@@ -13,19 +20,15 @@ export function CashierView() {
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [showCashRegisterModal, setShowCashRegisterModal] = useState(false);
 
-  // Solo mostrar órdenes PAGADAS (ya cobradas por el mesero)
-  const paidOrders = orders.filter(order => order.status === 'paid');
+  // Filter paid orders from today
+  const paidOrders = orders.filter(order => order.status === ORDER_STATUS.PAID);
+  const todayPaidOrders = getTodayOrders(paidOrders);
 
-  // Calcular totales del día
-  const today = new Date().toDateString();
-  const todayPaidOrders = paidOrders.filter(order => 
-    order.paidAt && new Date(order.paidAt).toDateString() === today
-  );
-  
+  // Calculate totals
   const todayTotal = todayPaidOrders.reduce((sum, order) => sum + order.total, 0);
   const todayCount = todayPaidOrders.length;
 
-  // Calcular totales por método de pago
+  // Calculate totals by payment method
   const totalCash = todayPaidOrders
     .filter(o => o.paymentMethod === 'cash')
     .reduce((sum, order) => sum + order.total, 0);
@@ -36,14 +39,16 @@ export function CashierView() {
     .filter(o => o.paymentMethod === 'mobile')
     .reduce((sum, order) => sum + order.total, 0);
 
-  const filteredOrders = paidOrders.filter(order => 
-    order.id.includes(searchQuery) || 
+  // Filter orders by search query
+  const filteredOrders = paidOrders.filter(order =>
+    order.id.includes(searchQuery) ||
     order.tableNumber.toString().includes(searchQuery) ||
     order.waiterName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const selectedOrder = orders.find(o => o.id === selectedOrderId);
 
+  // Event handlers
   const handleViewTicket = (orderId: string) => {
     setSelectedOrderId(orderId);
     setShowTicketModal(true);
@@ -54,35 +59,34 @@ export function CashierView() {
   };
 
   const handleConfirmCashRegister = () => {
+    if (!currentUser) {
+      toast.error('No hay usuario activo');
+      return;
+    }
+
     const cashRegister = {
-      userId: currentUser?.id,
       date: new Date(),
-      totalCash,
-      totalCard,
-      totalMobile,
-      orderCount: todayCount,
+      openingAmount: 0,
+      sales: todayTotal,
+      cancellations: 0,
+      adjustments: 0,
+      closingAmount: todayTotal,
+      cashierName: currentUser.name,
+      status: 'closed' as const,
     };
+
     addCashRegister(cashRegister);
     toast.success('Reporte de corte de caja generado');
     setShowCashRegisterModal(false);
   };
 
-  const getPaymentMethodLabel = (method?: string) => {
-    const labels = {
-      cash: 'Efectivo',
-      card: 'Tarjeta',
-      mobile: 'Pago Móvil',
-    };
-    return labels[method as keyof typeof labels] || 'N/A';
+  // Helper functions
+  const getPaymentMethodLabel = (method?: string): string => {
+    return method ? PAYMENT_METHOD_LABELS[method] || 'N/A' : 'N/A';
   };
 
-  const getPaymentMethodIcon = (method?: string) => {
-    const icons = {
-      cash: '💵',
-      card: '💳',
-      mobile: '📱',
-    };
-    return icons[method as keyof typeof icons] || '💰';
+  const getPaymentMethodIcon = (method?: string): string => {
+    return method ? PAYMENT_METHOD_ICONS[method] || '💰' : '💰';
   };
 
   return (
@@ -101,7 +105,7 @@ export function CashierView() {
               </div>
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">Total del Día</p>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">${todayTotal.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{formatCurrency(todayTotal)}</p>
               </div>
               <button
                 onClick={handleCashRegister}
@@ -120,7 +124,7 @@ export function CashierView() {
               </div>
               <div className="flex-1 bg-green-50 dark:bg-green-950/30 rounded-lg p-3 border border-green-200 dark:border-green-800">
                 <p className="text-xs text-green-600 dark:text-green-400 mb-1">Total</p>
-                <p className="text-lg font-bold text-green-700 dark:text-green-300">${todayTotal.toFixed(2)}</p>
+                <p className="text-lg font-bold text-green-700 dark:text-green-300">{formatCurrency(todayTotal)}</p>
               </div>
               <button
                 onClick={handleCashRegister}
@@ -191,9 +195,7 @@ export function CashierView() {
                   <div>
                     <p className="text-xs text-muted-foreground mb-0.5">Hora</p>
                     <p className="text-sm font-medium text-card-foreground">
-                      {order.paidAt 
-                        ? new Date(order.paidAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-                        : 'N/A'}
+                      {order.paidAt ? formatTime(new Date(order.paidAt)) : 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -203,7 +205,7 @@ export function CashierView() {
                     <span className="text-lg">{getPaymentMethodIcon(order.paymentMethod)}</span>
                     <span className="text-sm text-muted-foreground">{getPaymentMethodLabel(order.paymentMethod)}</span>
                   </div>
-                  <p className="text-xl font-bold text-green-600 dark:text-green-400">${order.total.toFixed(2)}</p>
+                  <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatCurrency(order.total)}</p>
                 </div>
               </div>
             ))
@@ -265,15 +267,13 @@ export function CashierView() {
                         {order.items.reduce((sum, item) => sum + item.quantity, 0)} items
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600 dark:text-green-400">
-                        ${order.total.toFixed(2)}
+                        {formatCurrency(order.total)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                         {getPaymentMethodIcon(order.paymentMethod)} {getPaymentMethodLabel(order.paymentMethod)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                        {order.paidAt 
-                          ? new Date(order.paidAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-                          : 'N/A'}
+                        {order.paidAt ? formatTime(new Date(order.paidAt)) : 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button

@@ -105,7 +105,7 @@ export function SettingsView() {
   return (
     <div className="h-full flex flex-col bg-background overflow-hidden">
       <PageHeader
-        breadcrumb={isAdmin ? "BACK OFFICE / CONFIGURACIÓN" : "CONFIGURACIÓN"}
+        breadcrumb={isAdmin ? "GESTIÓN / CONFIGURACIÓN" : "CONFIGURACIÓN"}
         title="Configuración"
         subtitle={isAdmin ? "Información del negocio y configuración personal" : "Configuración de accesibilidad personal"}
       />

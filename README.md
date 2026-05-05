@@ -1,7 +1,7 @@
 
-  # Energy Management System Dashboard
+  # POS
 
-  This is a code bundle for Energy Management System Dashboard. The original project is available at https://www.figma.com/design/LnSLNOvea75ka5bAi97hYq/Energy-Management-System-Dashboard.
+  This is a code bundle for POS. The original project is available at https://www.figma.com/design/LnSLNOvea75ka5bAi97hYq/POS.
 
   ## Running the code
 

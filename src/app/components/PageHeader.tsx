@@ -1,21 +1,38 @@
 import { ReactNode } from 'react';
 
 interface PageHeaderProps {
+  breadcrumb?: string;
   title: string;
-  description?: string;
+  subtitle?: string;
+  icon?: ReactNode;
   actions?: ReactNode;
 }
 
-export function PageHeader({ title, description, actions }: PageHeaderProps) {
+export function PageHeader({ breadcrumb, title, subtitle, icon, actions }: PageHeaderProps) {
   return (
-    <div className="flex items-center justify-between mb-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">{title}</h1>
-        {description && (
-          <p className="text-muted-foreground mt-1">{description}</p>
+    <header
+      className="bg-card border-b border-border px-6 shadow-sm flex-shrink-0 flex items-center justify-between"
+      style={{ height: '96px' }}
+    >
+      <div className="flex items-center gap-3">
+        {icon && (
+          <div className="text-primary">{icon}</div>
         )}
+        <div>
+          {breadcrumb && (
+            <p className="text-xs uppercase tracking-wider text-primary font-semibold mb-1">
+              {breadcrumb}
+            </p>
+          )}
+          <h1 className="text-2xl font-bold text-card-foreground">{title}</h1>
+          {subtitle && (
+            <p className="text-sm text-muted-foreground">{subtitle}</p>
+          )}
+        </div>
       </div>
-      {actions && <div className="flex gap-2">{actions}</div>}
-    </div>
+      {actions && (
+        <div className="flex items-center gap-3">{actions}</div>
+      )}
+    </header>
   );
 }

@@ -39,6 +39,7 @@ export interface Order {
 }
 
 export interface Table {
+  id: string; // UUID del backend
   number: number;
   status: 'free' | 'occupied' | 'billed'; // libre, ocupada, en cuenta
   capacity: number;
@@ -46,6 +47,8 @@ export interface Table {
   orderId?: string;
   waiterName?: string;
   occupiedAt?: Date;
+  waiterId?: string;
+  currentOrderId?: string;
 }
 
 export interface CashRegister {

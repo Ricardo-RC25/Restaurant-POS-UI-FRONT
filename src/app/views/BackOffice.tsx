@@ -78,7 +78,7 @@ export function BackOfficeView() {
   return (
     <div className="h-full flex flex-col bg-background overflow-hidden">
       <PageHeader
-        title="Back Office"
+        title="Gestión"
         subtitle="Panel de administración de la taquería"
         breadcrumb="POS / ADMINISTRACIÓN"
       />

@@ -138,7 +138,7 @@ export function AuditLogView() {
   return (
     <div className="h-full flex flex-col bg-background overflow-hidden">
       <PageHeader
-        breadcrumb="BACK OFFICE / AUDITORÍA"
+        breadcrumb="GESTIÓN / AUDITORÍA"
         title="Registro de Auditoría"
         subtitle="Historial completo de actividad del sistema"
         actions={

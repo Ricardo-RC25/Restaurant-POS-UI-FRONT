@@ -2,6 +2,7 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 import { MenuItem, Order, Table, User, Notification, Category, AuditLog, CashRegister, Extra } from '../types';
 import { toast } from 'sonner';
 import { initialUsers } from '../data/initialUsers';
+import { tablesService } from '../services/tablesService';
 
 export interface AccessibilitySettings {
   darkMode: boolean;
@@ -75,7 +76,7 @@ interface AppContextType {
   updateOrder: (id: string, updates: Partial<Order>) => void;
   deleteOrder: (id: string) => void;
   updateTable: (tableNumber: number, updates: Partial<Table>) => void;
-  addTable: (table: Table) => void;
+  addTable: (table: Omit<Table, 'id'>) => Promise<void>;
   deleteTable: (tableNumber: number) => void;
   login: (username: string, password: string) => boolean;
   logout: () => void;
@@ -181,6 +182,8 @@ const loadTables = (): Table[] => {
       const parsed = JSON.parse(stored);
       return parsed.map((table: any) => ({
         ...table,
+        // Generar ID temporal para datos legacy que no tienen id
+        id: table.id || `local-${table.number}-${Date.now()}`,
         occupiedAt: table.occupiedAt ? new Date(table.occupiedAt) : undefined,
       }));
     } catch (error) {
@@ -369,6 +372,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem('pos_menu_items', JSON.stringify(menuItems));
     window.dispatchEvent(new Event('menuItemsUpdated'));
+  }, [menuItems]);
+
+  // Actualizar productCount en categorías cuando cambian los menuItems
+  useEffect(() => {
+    const updatedCategories = categories.map(category => {
+      const count = menuItems.filter(item => item.categoryId === category.id).length;
+      return { ...category, productCount: count };
+    });
+
+    // Solo actualizar si hay cambios en los conteos
+    const hasChanges = updatedCategories.some((cat, idx) =>
+      cat.productCount !== categories[idx]?.productCount
+    );
+
+    if (hasChanges) {
+      setCategories(updatedCategories);
+    }
   }, [menuItems]);
 
   // Persistir categorías
@@ -627,21 +647,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ));
   };
 
-  const addTable = (table: Table) => {
-    setTables([...tables, table]);
-    toast.success(`Mesa ${table.number} creada`);
+  const addTable = async (table: Omit<Table, 'id'>) => {
+    try {
+      console.log('🏗️ [addTable] Creando mesa en API:', table);
 
-    if (currentUser) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'create',
-        module: 'tables',
-        entityType: 'table',
-        entityId: table.id,
-        details: `Mesa ${table.number} - Capacidad: ${table.capacity}`,
+      // Llamar a la API para crear la mesa
+      const response = await tablesService.createTable({
+        number: table.number,
+        status: table.status,
       });
+
+      // Crear el objeto de mesa con el ID del backend
+      const newTable: Table = {
+        ...table,
+        id: response.tableId,
+      };
+
+      // Actualizar el estado local
+      setTables([...tables, newTable]);
+      toast.success(`Mesa ${table.number} creada`);
+
+      if (currentUser) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'create',
+          module: 'tables',
+          entityType: 'table',
+          entityId: newTable.id,
+          details: `Mesa ${table.number} - Capacidad: ${table.capacity}`,
+        });
+      }
+
+      console.log('✅ [addTable] Mesa creada exitosamente:', newTable);
+    } catch (error) {
+      console.error('❌ [addTable] Error al crear mesa:', error);
+      toast.error('Error al crear la mesa. Intenta nuevamente.');
+      throw error;
     }
   };
 
@@ -916,8 +959,46 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return { total, count, byCash, byCard, byMobile };
   };
 
-  const addExtra = (extra: Extra) => {
-    setExtras([...extras, extra]);
+  const addExtra = (extra: Extra & { categoryIds?: string[]; productIds?: string[] }) => {
+    const newExtraId = extra.id || Date.now().toString();
+    const newExtra = { ...extra, id: newExtraId };
+
+    console.log('➕ [addExtra] Agregando extra:', {
+      id: newExtraId,
+      name: extra.name,
+      applicationType: extra.applicationType,
+      categoryIds: extra.categoryIds,
+      productIds: extra.productIds,
+    });
+
+    setExtras([...extras, newExtra]);
+
+    // Actualizar relaciones con categorías
+    if (extra.categoryIds && extra.categoryIds.length > 0) {
+      const newCategoryExtras = new Map(categoryExtras);
+      extra.categoryIds.forEach(categoryId => {
+        const current = newCategoryExtras.get(categoryId) || [];
+        if (!current.includes(newExtraId)) {
+          newCategoryExtras.set(categoryId, [...current, newExtraId]);
+        }
+      });
+      console.log('📂 [addExtra] Actualizando categoryExtras:', Object.fromEntries(newCategoryExtras));
+      setCategoryExtras(newCategoryExtras);
+    }
+
+    // Actualizar relaciones con productos
+    if (extra.productIds && extra.productIds.length > 0) {
+      const newProductExtras = new Map(productExtras);
+      extra.productIds.forEach(productId => {
+        const current = newProductExtras.get(productId) || [];
+        if (!current.includes(newExtraId)) {
+          newProductExtras.set(productId, [...current, newExtraId]);
+        }
+      });
+      console.log('📦 [addExtra] Actualizando productExtras:', Object.fromEntries(newProductExtras));
+      setProductExtras(newProductExtras);
+    }
+
     toast.success(`Extra ${extra.name} agregado`);
 
     if (currentUser) {
@@ -928,17 +1009,77 @@ export function AppProvider({ children }: { children: ReactNode }) {
         action: 'create',
         module: 'inventory',
         entityType: 'extra',
-        entityId: extra.id,
+        entityId: newExtraId,
         details: `Tipo: ${extra.applicationType}, Precio: $${extra.price}`,
       });
     }
   };
 
-  const updateExtra = (id: string, updates: Partial<Extra>) => {
+  const updateExtra = (id: string, updates: Partial<Extra> & { categoryIds?: string[]; productIds?: string[] }) => {
     const extra = extras.find(e => e.id === id);
+
+    console.log('✏️ [updateExtra] Actualizando extra:', {
+      id,
+      name: updates.name || extra?.name,
+      applicationType: updates.applicationType,
+      categoryIds: updates.categoryIds,
+      productIds: updates.productIds,
+    });
+
     setExtras(extras.map(extra =>
       extra.id === id ? { ...extra, ...updates } : extra
     ));
+
+    // Actualizar relaciones con categorías
+    if (updates.categoryIds !== undefined) {
+      const newCategoryExtras = new Map(categoryExtras);
+
+      // Remover el extra de todas las categorías que ya no lo tienen
+      categoryExtras.forEach((extraIds, categoryId) => {
+        if (!updates.categoryIds!.includes(categoryId)) {
+          newCategoryExtras.set(
+            categoryId,
+            extraIds.filter(extraId => extraId !== id)
+          );
+        }
+      });
+
+      // Agregar el extra a las nuevas categorías
+      updates.categoryIds.forEach(categoryId => {
+        const current = newCategoryExtras.get(categoryId) || [];
+        if (!current.includes(id)) {
+          newCategoryExtras.set(categoryId, [...current, id]);
+        }
+      });
+
+      setCategoryExtras(newCategoryExtras);
+    }
+
+    // Actualizar relaciones con productos
+    if (updates.productIds !== undefined) {
+      const newProductExtras = new Map(productExtras);
+
+      // Remover el extra de todos los productos que ya no lo tienen
+      productExtras.forEach((extraIds, productId) => {
+        if (!updates.productIds!.includes(productId)) {
+          newProductExtras.set(
+            productId,
+            extraIds.filter(extraId => extraId !== id)
+          );
+        }
+      });
+
+      // Agregar el extra a los nuevos productos
+      updates.productIds.forEach(productId => {
+        const current = newProductExtras.get(productId) || [];
+        if (!current.includes(id)) {
+          newProductExtras.set(productId, [...current, id]);
+        }
+      });
+
+      setProductExtras(newProductExtras);
+    }
+
     toast.success('Extra actualizado');
 
     if (currentUser && extra) {
@@ -958,6 +1099,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const deleteExtra = (id: string) => {
     const extra = extras.find(e => e.id === id);
     setExtras(extras.filter(extra => extra.id !== id));
+
+    // Eliminar relaciones con categorías
+    const newCategoryExtras = new Map(categoryExtras);
+    categoryExtras.forEach((extraIds, categoryId) => {
+      newCategoryExtras.set(
+        categoryId,
+        extraIds.filter(extraId => extraId !== id)
+      );
+    });
+    setCategoryExtras(newCategoryExtras);
+
+    // Eliminar relaciones con productos
+    const newProductExtras = new Map(productExtras);
+    productExtras.forEach((extraIds, productId) => {
+      newProductExtras.set(
+        productId,
+        extraIds.filter(extraId => extraId !== id)
+      );
+    });
+    setProductExtras(newProductExtras);
+
     toast.success('Extra eliminado');
 
     if (currentUser && extra) {
@@ -976,28 +1138,50 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const getAvailableExtrasForProduct = (productId: string): Extra[] => {
     const product = menuItems.find(p => p.id === productId);
-    if (!product) return [];
+    if (!product) {
+      console.log('❌ [getAvailableExtrasForProduct] Producto no encontrado:', productId);
+      return [];
+    }
+
+    console.log('🔍 [getAvailableExtrasForProduct] Buscando extras para:', {
+      productId,
+      productName: product.name,
+      categoryId: product.categoryId,
+      categoryName: product.category,
+    });
 
     const availableExtras: Extra[] = [];
 
+    // Extras globales (aplican a todos los productos)
+    const globalExtras = extras.filter(e => e.active && e.applicationType === 'global');
+    console.log('🌍 [getAvailableExtrasForProduct] Extras globales:', globalExtras.map(e => e.name));
+    availableExtras.push(...globalExtras);
+
     // Extras específicos del producto
     const productExtraIds = productExtras.get(productId) || [];
+    console.log('📦 [getAvailableExtrasForProduct] IDs de extras del producto:', productExtraIds);
     productExtraIds.forEach(extraId => {
       const extra = extras.find(e => e.id === extraId && e.active);
-      if (extra) availableExtras.push(extra);
+      if (extra && !availableExtras.find(e => e.id === extraId)) {
+        console.log('  ➕ Agregando extra de producto:', extra.name);
+        availableExtras.push(extra);
+      }
     });
 
     // Extras de la categoría del producto
     if (product.categoryId) {
       const categoryExtraIds = categoryExtras.get(product.categoryId) || [];
+      console.log('📂 [getAvailableExtrasForProduct] IDs de extras de categoría:', categoryExtraIds);
       categoryExtraIds.forEach(extraId => {
         const extra = extras.find(e => e.id === extraId && e.active);
         if (extra && !availableExtras.find(e => e.id === extraId)) {
+          console.log('  ➕ Agregando extra de categoría:', extra.name);
           availableExtras.push(extra);
         }
       });
     }
 
+    console.log('✅ [getAvailableExtrasForProduct] Total de extras disponibles:', availableExtras.map(e => e.name));
     return availableExtras;
   };
 

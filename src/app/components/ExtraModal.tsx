@@ -33,11 +33,19 @@ export function ExtraModal({ extra, onClose, onSave }: ExtraModalProps) {
 
   useEffect(() => {
     if (extra) {
+      console.log('📝 [ExtraModal] Cargando extra para editar:', {
+        id: extra.id,
+        name: extra.name,
+        applicationType: extra.applicationType,
+        categoryIds: extra.categoryIds,
+        productIds: extra.productIds,
+      });
+
       setFormData({
         name: extra.name,
         description: extra.description || '',
         price: extra.price,
-        active: extra.active !== false, // Por defecto true si no está definido
+        active: extra.active !== false,
         applicationType: extra.applicationType || 'global',
         applyToAllProducts: extra.applicationType === 'global',
         categoryIds: extra.categoryIds || [],
@@ -90,7 +98,7 @@ export function ExtraModal({ extra, onClose, onSave }: ExtraModalProps) {
     if (validateForm()) {
       // Determinar el tipo de aplicación basado en las selecciones
       let applicationType: 'global' | 'category' | 'product' = 'global';
-      
+
       if (!formData.applyToAllProducts) {
         if (formData.productIds.length > 0) {
           applicationType = 'product';
@@ -99,7 +107,7 @@ export function ExtraModal({ extra, onClose, onSave }: ExtraModalProps) {
         }
       }
 
-      onSave({
+      const dataToSave = {
         name: formData.name,
         description: formData.description,
         price: formData.price,
@@ -107,7 +115,11 @@ export function ExtraModal({ extra, onClose, onSave }: ExtraModalProps) {
         applicationType,
         categoryIds: formData.categoryIds,
         productIds: formData.productIds,
-      });
+      };
+
+      console.log('💾 [ExtraModal] Guardando extra:', dataToSave);
+
+      onSave(dataToSave);
     }
   };
 

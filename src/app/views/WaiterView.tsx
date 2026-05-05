@@ -28,9 +28,9 @@ export function WaiterView() {
   const [showMobileOrder, setShowMobileOrder] = useState(false);
 
   // Obtener órdenes del mesero actual
-  const myOrders = orders.filter(order => 
-    order.waiterName === currentUser?.name && 
-    (order.status === 'ready' || order.status === 'preparing' || order.status === 'pending' || order.status === 'delivered')
+  const myOrders = orders.filter(order =>
+    order.waiterName === currentUser?.name &&
+    (order.status === 'ready' || order.status === 'delivered')
   );
 
   // Obtener categorías únicas (solo activas)
@@ -169,7 +169,7 @@ export function WaiterView() {
     setOrderItems([]);
   };
 
-  const handleSendToKitchen = async () => {
+  const handleCreateOrder = async () => {
     if (!selectedTable) {
       toast.error('Selecciona una mesa');
       return;
@@ -197,14 +197,14 @@ export function WaiterView() {
       subtotal,
       tax,
       total,
-      status: 'pending',
+      status: 'ready',
       createdAt: new Date(),
       waiterName: currentUser?.name,
     };
 
     addOrder(newOrder);
 
-    // AHORA SÍ marcar la mesa como ocupada cuando se envía la orden
+    // Marcar la mesa como ocupada cuando se crea la orden
     await updateTable(selectedTable, {
       status: 'occupied',
       waiterId: currentUser?.id,
@@ -212,7 +212,7 @@ export function WaiterView() {
       occupiedAt: new Date()
     });
 
-    toast.success('Orden enviada a cocina');
+    toast.success('Orden registrada y lista para entregar');
 
     setOrderItems([]);
     setSelectedTable(null);
@@ -231,7 +231,7 @@ export function WaiterView() {
 
   const handleUpdateExistingOrder = () => {
     if (!editingOrder) {
-      handleSendToKitchen();
+      handleCreateOrder();
       return;
     }
 
@@ -416,9 +416,9 @@ export function WaiterView() {
                     items={orderItems}
                     onUpdateQuantity={handleUpdateQuantity}
                     onRemoveItem={handleRemoveItem}
-                    onCheckout={editingOrder ? handleUpdateExistingOrder : handleSendToKitchen}
+                    onCheckout={editingOrder ? handleUpdateExistingOrder : handleCreateOrder}
                     onClear={handleClearOrder}
-                    checkoutLabel={editingOrder ? 'Actualizar Orden' : 'Enviar a Cocina'}
+                    checkoutLabel={editingOrder ? 'Actualizar Orden' : 'Crear Orden'}
                   />
                 </div>
               </div>
@@ -514,9 +514,9 @@ export function WaiterView() {
                     items={orderItems}
                     onUpdateQuantity={handleUpdateQuantity}
                     onRemoveItem={handleRemoveItem}
-                    onCheckout={editingOrder ? handleUpdateExistingOrder : handleSendToKitchen}
+                    onCheckout={editingOrder ? handleUpdateExistingOrder : handleCreateOrder}
                     onClear={handleClearOrder}
-                    checkoutLabel={editingOrder ? 'Actualizar Orden' : 'Enviar a Cocina'}
+                    checkoutLabel={editingOrder ? 'Actualizar Orden' : 'Crear Orden'}
                   />
                 </div>
               )}

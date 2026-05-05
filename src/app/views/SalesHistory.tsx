@@ -107,7 +107,7 @@ export function SalesHistory() {
   return (
     <div className="h-full flex flex-col bg-background overflow-hidden">
       <PageHeader
-        breadcrumb="BACK OFFICE / HISTORIAL"
+        breadcrumb="GESTIÓN / HISTORIAL"
         title="Historial de Ventas"
         subtitle="Consulta todas las órdenes cobradas"
         actions={
