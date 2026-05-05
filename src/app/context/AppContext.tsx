@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { initialUsers } from '../data/initialUsers';
 import { tablesService } from '../services/tablesService';
 import { usersService } from '../services/usersService';
+import { authService } from '../services/authService';
 
 export interface AccessibilitySettings {
   darkMode: boolean;
@@ -79,7 +80,7 @@ interface AppContextType {
   updateTable: (tableNumber: number, updates: Partial<Table>) => Promise<void>;
   addTable: (table: Omit<Table, 'id'>) => Promise<void>;
   deleteTable: (id: string) => Promise<void>;
-  login: (username: string, password: string) => boolean;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   addUser: (userData: Omit<User, 'id' | 'createdAt'>) => Promise<void>;
   updateUser: (id: string, updates: Partial<User>) => Promise<void>;
@@ -831,31 +832,54 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = (username: string, password: string) => {
-    const user = users.find(
-      u => u.username === username && u.password === password && u.active
-    );
+  const login = async (username: string, password: string) => {
+    try {
+      console.log('🔐 [login] Autenticando usuario con API:', username);
 
-    if (user) {
-      setCurrentUser(user);
-      toast.success(`Bienvenido ${user.name}`);
+      const response = await authService.login({ username, password });
 
-      addAuditLog({
-        userId: user.id,
-        userName: user.name,
-        userRole: user.role,
-        action: 'login',
-        module: 'auth',
-        entityType: 'session',
-        entityId: user.id,
-        details: `Rol: ${user.role}`,
-      });
+      // Guardar token en localStorage
+      localStorage.setItem('auth_token', response.token);
 
-      return true;
+      // Buscar el usuario completo en el estado local
+      const user = users.find(u => u.id === response.user.id);
+
+      if (user) {
+        setCurrentUser(user);
+        toast.success(`Bienvenido ${response.user.name}`);
+
+        addAuditLog({
+          userId: user.id,
+          userName: user.name,
+          userRole: user.role,
+          action: 'login',
+          module: 'auth',
+          entityType: 'session',
+          entityId: user.id,
+          details: `Rol: ${user.role}`,
+        });
+
+        return true;
+      } else {
+        // Si no encontramos el usuario completo, usar los datos básicos de la API
+        const basicUser: User = {
+          id: response.user.id,
+          username: username,
+          password: '', // No guardamos la contraseña
+          name: response.user.name,
+          role: response.user.role as 'admin' | 'manager' | 'waiter' | 'cashier',
+          active: true,
+          createdAt: new Date(),
+        };
+        setCurrentUser(basicUser);
+        toast.success(`Bienvenido ${response.user.name}`);
+        return true;
+      }
+    } catch (error) {
+      console.error('Error en login:', error);
+      toast.error('Credenciales incorrectas');
+      return false;
     }
-
-    toast.error('Credenciales incorrectas');
-    return false;
   };
 
   const logout = () => {
@@ -871,6 +895,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         details: `Usuario cerró sesión`,
       });
     }
+
+    // Eliminar token de localStorage
+    localStorage.removeItem('auth_token');
+
     setCurrentUser(null);
     toast.success('Sesión cerrada');
   };

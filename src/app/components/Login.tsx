@@ -30,13 +30,13 @@ export function Login() {
   const availableUsers = users.filter(u => u.active);
 
   // Handlers
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login(username, password);
+    await login(username, password);
   };
 
-  const handleQuickLogin = (user: any) => {
-    login(user.username, user.password);
+  const handleQuickLogin = async (user: any) => {
+    await login(user.username, user.password);
   };
 
   const handleResetUsers = () => {
