@@ -87,9 +87,9 @@ export function CategoriesView() {
     setShowDeleteModal(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (categoryToDelete) {
-      deleteCategory(categoryToDelete.id);
+      await deleteCategory(categoryToDelete.id);
       setCategoryToDelete(null);
       setShowDeleteModal(false);
     }

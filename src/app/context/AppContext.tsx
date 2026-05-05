@@ -60,7 +60,7 @@ interface AppContextType {
   setCategories: (categories: Category[]) => void;
   addCategory: (category: Omit<Category, 'id' | 'productCount'>) => Promise<void>;
   updateCategory: (id: string, updates: Partial<Category>) => Promise<void>;
-  deleteCategory: (id: string) => void;
+  deleteCategory: (id: string) => Promise<void>;
   orders: Order[];
   tables: Table[];
   users: User[]
@@ -1193,22 +1193,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const deleteCategory = (id: string) => {
+  const deleteCategory = async (id: string) => {
     const category = categories.find(c => c.id === id);
-    setCategories(categories.filter(cat => cat.id !== id));
-    toast.success('Categoría eliminada');
 
-    if (currentUser && category) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'delete',
-        module: 'inventory',
-        entityType: 'category',
-        entityId: id,
-        details: `Categoría eliminada: ${category.name}`,
-      });
+    try {
+      await categoriesService.deleteCategory(id);
+      setCategories(categories.filter(cat => cat.id !== id));
+      toast.success('Categoría eliminada');
+
+      if (currentUser && category) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'delete',
+          module: 'inventory',
+          entityType: 'category',
+          entityId: id,
+          details: `Categoría eliminada: ${category.name}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error al eliminar categoría:', error);
+      toast.error('Error al eliminar la categoría. Intenta nuevamente.');
     }
   };
 
