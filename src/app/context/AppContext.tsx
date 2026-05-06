@@ -1515,11 +1515,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       console.log('➕ [addExtra] Creando extra en API:', extra);
 
-      // Convertir categoryIds a nombres de categorías
-      const categoryNames = (extra.categoryIds || []).map(catId => {
-        const category = categories.find(c => c.id === catId);
-        return category?.name || '';
-      }).filter(name => name !== '');
+      // Preparar categories y products según application_type
+      let categories: string[] = [];
+      let products: string[] = [];
+
+      if (extra.applicationType === 'category') {
+        // Solo enviar categorías cuando es tipo category
+        const categoryNames = (extra.categoryIds || []).map(catId => {
+          const cat = categories.find(c => c.id === catId);
+          return cat?.name || '';
+        }).filter(name => name !== '');
+        categories = categoryNames;
+        products = [];
+      } else if (extra.applicationType === 'product') {
+        // Solo enviar productos cuando es tipo product
+        categories = [];
+        products = extra.productIds || [];
+      } else {
+        // Global: ambos vacíos
+        categories = [];
+        products = [];
+      }
+
+      console.log('📤 [addExtra] Enviando a API:', {
+        application_type: extra.applicationType,
+        categories,
+        products,
+      });
 
       // Llamar a la API para crear el extra
       const response = await extrasService.createExtra({
@@ -1528,8 +1550,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         price: extra.price,
         application_type: extra.applicationType,
         active: extra.active,
-        categories: categoryNames,
-        products: extra.productIds || [],
+        categories,
+        products,
       });
 
       // Recargar extras desde la API para sincronizar
@@ -1569,11 +1591,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Combinar el estado actual con las actualizaciones
       const updatedExtra = { ...extra, ...updates };
 
-      // Convertir categoryIds a nombres de categorías
-      const categoryNames = (updates.categoryIds !== undefined ? updates.categoryIds : []).map(catId => {
-        const category = categories.find(c => c.id === catId);
-        return category?.name || '';
-      }).filter(name => name !== '');
+      // Preparar categories y products según application_type
+      let apiCategories: string[] | undefined = undefined;
+      let apiProducts: string[] | undefined = undefined;
+
+      // Solo si se están actualizando categoryIds o productIds, prepararlos según el tipo
+      if (updates.categoryIds !== undefined || updates.productIds !== undefined || updates.applicationType !== undefined) {
+        const appType = updatedExtra.applicationType;
+
+        if (appType === 'category') {
+          // Solo enviar categorías cuando es tipo category
+          const catIds = updates.categoryIds !== undefined ? updates.categoryIds : (extra as any).categoryIds || [];
+          apiCategories = catIds.map((catId: string) => {
+            const cat = categories.find(c => c.id === catId);
+            return cat?.name || '';
+          }).filter((name: string) => name !== '');
+          apiProducts = [];
+        } else if (appType === 'product') {
+          // Solo enviar productos cuando es tipo product
+          apiCategories = [];
+          apiProducts = updates.productIds !== undefined ? updates.productIds : (extra as any).productIds || [];
+        } else {
+          // Global: ambos vacíos
+          apiCategories = [];
+          apiProducts = [];
+        }
+      }
+
+      console.log('📤 [updateExtra] Enviando a API:', {
+        application_type: updatedExtra.applicationType,
+        categories: apiCategories,
+        products: apiProducts,
+      });
 
       // Preparar datos para la API
       const apiData: any = {
@@ -1582,8 +1631,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         price: updatedExtra.price,
         application_type: updatedExtra.applicationType,
         active: updatedExtra.active,
-        categories: updates.categoryIds !== undefined ? categoryNames : undefined,
-        products: updates.productIds !== undefined ? updates.productIds : undefined,
+        categories: apiCategories,
+        products: apiProducts,
       };
 
       // Remover campos undefined
