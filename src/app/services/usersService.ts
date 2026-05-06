@@ -56,9 +56,7 @@ export const usersService = {
    * Obtener todos los usuarios
    */
   async getUsers(): Promise<UserApiResponse[]> {
-    console.log('📡 [API] Obteniendo todos los usuarios');
     const response = await apiClient.get<UserApiResponse[]>('/users');
-    console.log('✅ [API] Usuarios obtenidos:', response);
     return response;
   },
 
@@ -66,9 +64,7 @@ export const usersService = {
    * Crear un nuevo usuario
    */
   async createUser(data: CreateUserRequest): Promise<CreateUserResponse> {
-    console.log('📡 [API] Creando usuario:', { ...data, password: '***' });
     const response = await apiClient.post<CreateUserResponse>('/users', data);
-    console.log('✅ [API] Usuario creado:', response);
     return response;
   },
 
@@ -76,9 +72,7 @@ export const usersService = {
    * Actualizar un usuario
    */
   async updateUser(id: string, data: UpdateUserRequest): Promise<UpdateUserResponse> {
-    console.log('📡 [API] Actualizando usuario:', { id, data });
     const response = await apiClient.put<UpdateUserResponse>(`/users/${id}`, data);
-    console.log('✅ [API] Usuario actualizado:', response);
     return response;
   },
 
@@ -86,9 +80,7 @@ export const usersService = {
    * Eliminar un usuario
    */
   async deleteUser(id: string): Promise<DeleteUserResponse> {
-    console.log('📡 [API] Eliminando usuario:', id);
     const response = await apiClient.delete<DeleteUserResponse>(`/users/${id}`);
-    console.log('✅ [API] Usuario eliminado:', response);
     return response;
   },
 };

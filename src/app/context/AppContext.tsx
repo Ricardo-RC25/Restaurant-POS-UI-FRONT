@@ -328,7 +328,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fetchTables = async () => {
       try {
-        console.log('🔄 [AppContext] Cargando mesas desde API...');
         const apiTables = await tablesService.getTables();
 
         // Mapear de snake_case a camelCase y convertir tipos
@@ -344,7 +343,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           occupiedAt: table.occupied_at ? new Date(table.occupied_at) : undefined,
         }));
 
-        console.log('✅ [AppContext] Mesas cargadas desde API:', mappedTables);
         setTables(mappedTables);
 
         // Guardar en localStorage como cache
@@ -364,7 +362,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        console.log('🔄 [AppContext] Cargando usuarios desde API...');
         const apiUsers = await usersService.getUsers();
 
         // Mapear de snake_case a camelCase y convertir tipos
@@ -380,7 +377,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           createdAt: new Date(user.created_at),
         }));
 
-        console.log('✅ [AppContext] Usuarios cargados desde API:', mappedUsers);
         setUsers(mappedUsers);
 
         // Guardar en localStorage como cache
@@ -400,7 +396,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        console.log('🔄 [AppContext] Cargando categorías desde API...');
         const apiCategories = await categoriesService.getCategories();
 
         // Mapear de snake_case a camelCase y convertir tipos
@@ -413,7 +408,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           active: category.active === 1,
         }));
 
-        console.log('✅ [AppContext] Categorías cargadas desde API:', mappedCategories);
         setCategories(mappedCategories);
 
         // Guardar en localStorage como cache
@@ -433,7 +427,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
-        console.log('🔄 [AppContext] Cargando productos desde API...');
         const apiMenuItems = await menuItemsService.getMenuItems();
 
         // Mapear de snake_case a camelCase y convertir tipos
@@ -458,7 +451,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           };
         });
 
-        console.log('✅ [AppContext] Productos cargados desde API:', mappedMenuItems);
         setMenuItems(mappedMenuItems);
 
         // Guardar en localStorage como cache
@@ -481,8 +473,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fetchExtras = async () => {
       try {
-        console.log('🔄 [AppContext] Cargando extras desde API...');
-
         const apiExtras = await extrasService.getExtras();
 
         // Mapear datos de la API al formato del frontend
@@ -526,12 +516,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
         setCategoryExtras(newCategoryExtras);
         setProductExtras(newProductExtras);
-
-        console.log('✅ [AppContext] Extras cargados desde API:', {
-          totalExtras: mappedExtras.length,
-          categoryExtras: newCategoryExtras.size,
-          productExtras: newProductExtras.size,
-        });
       } catch (error) {
         console.error('❌ [AppContext] Error al cargar extras desde API:', error);
       }
@@ -708,8 +692,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addMenuItem = async (item: Omit<MenuItem, 'id' | 'createdAt'>) => {
     try {
-      console.log('📦 [addMenuItem] Creando producto en API:', item);
-
       // Llamar a la API para crear el producto
       const response = await menuItemsService.createMenuItem({
         name: item.name,
@@ -921,8 +903,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addTable = async (table: Omit<Table, 'id'>) => {
     try {
-      console.log('🏗️ [addTable] Creando mesa en API:', table);
-
       // Llamar a la API para crear la mesa
       const response = await tablesService.createTable({
         number: table.number,
@@ -930,7 +910,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       });
 
       // Recargar todas las mesas desde la API para asegurar sincronización
-      console.log('🔄 [addTable] Recargando mesas desde API...');
       const apiTables = await tablesService.getTables();
 
       const mappedTables: Table[] = apiTables.map(table => ({
@@ -961,8 +940,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           details: `Mesa ${table.number} - Capacidad: ${table.capacity}`,
         });
       }
-
-      console.log('✅ [addTable] Mesa creada y recargada desde API');
     } catch (error) {
       console.error('❌ [addTable] Error al crear mesa:', error);
       toast.error('Error al crear la mesa. Intenta nuevamente.');
@@ -974,13 +951,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const table = tables.find(t => t.id === id);
 
-      console.log('🗑️ [deleteTable] Eliminando mesa de API:', { id, tableNumber: table?.number });
-
       // Llamar a la API para eliminar la mesa
       await tablesService.deleteTable(id);
 
       // Recargar todas las mesas desde la API para asegurar sincronización
-      console.log('🔄 [deleteTable] Recargando mesas desde API...');
       const apiTables = await tablesService.getTables();
 
       const mappedTables: Table[] = apiTables.map(table => ({
@@ -1011,8 +985,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           details: `Mesa ${table.number}`,
         });
       }
-
-      console.log('✅ [deleteTable] Mesa eliminada y recargada desde API');
     } catch (error) {
       console.error('❌ [deleteTable] Error al eliminar mesa:', error);
       toast.error('Error al eliminar la mesa. Intenta nuevamente.');
@@ -1022,8 +994,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const login = async (username: string, password: string) => {
     try {
-      console.log('🔐 [login] Autenticando usuario con API:', username);
-
       const response = await authService.login({ username, password });
 
       // Guardar token en localStorage
@@ -1104,8 +1074,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addUser = async (userData: Omit<User, 'id' | 'createdAt'>) => {
     try {
-      console.log('👤 [addUser] Creando usuario en API:', userData);
-
       // Llamar a la API para crear el usuario
       const response = await usersService.createUser({
         username: userData.username,
@@ -1146,8 +1114,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           details: `Rol: ${newUser.role}, Email: ${newUser.email}`,
         });
       }
-
-      console.log('✅ [addUser] Usuario creado exitosamente:', newUser);
     } catch (error) {
       console.error('❌ [addUser] Error al crear usuario:', error);
       toast.error('Error al crear el usuario. Intenta nuevamente.');
@@ -1159,11 +1125,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const user = users.find(u => u.id === id);
       if (!user) {
-        console.error('❌ [updateUser] Usuario no encontrado:', id);
         return;
       }
-
-      console.log('✏️ [updateUser] Actualizando usuario:', { id, updates });
 
       // Crear el objeto actualizado completo (combinar estado actual con updates)
       const updatedUser = { ...user, ...updates };
@@ -1178,7 +1141,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         active: updatedUser.active,
       };
 
-      console.log('📤 [updateUser] Enviando a API:', apiData);
       await usersService.updateUser(id, apiData);
 
       // Actualizar estado local
@@ -1200,8 +1162,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           details: `Usuario: ${updatedUser.name}, Campos: ${Object.keys(updates).join(', ')}`,
         });
       }
-
-      console.log('✅ [updateUser] Usuario actualizado exitosamente');
     } catch (error) {
       console.error('❌ [updateUser] Error al actualizar usuario:', error);
       toast.error('Error al actualizar el usuario. Intenta nuevamente.');
@@ -1260,8 +1220,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addCategory = async (category: Omit<Category, 'id' | 'productCount'>) => {
     try {
-      console.log('📂 [addCategory] Creando categoría en API:', category);
-
       // Llamar a la API para crear la categoría
       const response = await categoriesService.createCategory({
         name: category.name,
@@ -1444,7 +1402,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       // Determinar qué enviar según application_type
       if (extra.applicationType === 'category') {
-        // ✅ CORRECTO: Enviar IDs directamente
         categories = extra.categoryIds || [];
         products = [];
       } else if (extra.applicationType === 'product') {
@@ -1455,13 +1412,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         categories = [];
         products = [];
       }
-
-      console.log('📡 [addExtra] Enviando a API:', {
-        name: extra.name,
-        application_type: extra.applicationType,
-        categories,  // ✅ IDs
-        products,    // ✅ IDs
-      });
 
       await extrasService.createExtra({
         name: extra.name,
@@ -1502,7 +1452,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       // Determinar qué enviar según application_type
       if (updates.applicationType === 'category') {
-        // ✅ CORRECTO: Enviar IDs directamente
         categories = updates.categoryIds || [];
         products = [];
       } else if (updates.applicationType === 'product') {
@@ -1513,14 +1462,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         categories = [];
         products = [];
       }
-
-      console.log('📡 [updateExtra] Enviando a API:', {
-        id,
-        name: updates.name,
-        application_type: updates.applicationType,
-        categories,  // ✅ IDs
-        products,    // ✅ IDs
-      });
 
       await extrasService.updateExtra(id, {
         name: updates.name,
@@ -1558,8 +1499,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const extra = extras.find(e => e.id === id);
 
-      console.log('🗑️ [deleteExtra] Eliminando extra:', id);
-
       await extrasService.deleteExtra(id);
 
       // Recargar desde API
@@ -1586,8 +1525,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const reloadExtrasFromAPI = async () => {
     try {
-      console.log('🔄 [reloadExtrasFromAPI] Recargando extras desde API...');
-
       const apiExtras = await extrasService.getExtras();
 
       // Mapear datos de la API al formato del frontend
@@ -1631,13 +1568,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       setCategoryExtras(newCategoryExtras);
       setProductExtras(newProductExtras);
-
-      console.log('✅ [reloadExtrasFromAPI] Extras recargados desde API:', {
-        totalExtras: mappedExtras.length,
-        categoryExtras: newCategoryExtras.size,
-        productExtras: newProductExtras.size,
-      });
-
     } catch (error) {
       console.error('❌ [reloadExtrasFromAPI] Error:', error);
       throw error;
@@ -1647,31 +1577,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const getAvailableExtrasForProduct = (productId: string): Extra[] => {
     const product = menuItems.find(p => p.id === productId);
     if (!product) {
-      console.log('❌ [getAvailableExtrasForProduct] Producto no encontrado:', productId);
       return [];
     }
-
-    console.log('🔍 [getAvailableExtrasForProduct] Buscando extras para:', {
-      productId,
-      productName: product.name,
-      categoryId: product.categoryId,
-      categoryName: product.category,
-    });
 
     const availableExtras: Extra[] = [];
 
     // Extras globales (aplican a todos los productos)
     const globalExtras = extras.filter(e => e.active && e.applicationType === 'global');
-    console.log('🌍 [getAvailableExtrasForProduct] Extras globales:', globalExtras.map(e => e.name));
     availableExtras.push(...globalExtras);
 
     // Extras específicos del producto
     const productExtraIds = productExtras.get(productId) || [];
-    console.log('📦 [getAvailableExtrasForProduct] IDs de extras del producto:', productExtraIds);
     productExtraIds.forEach(extraId => {
       const extra = extras.find(e => e.id === extraId && e.active);
       if (extra && !availableExtras.find(e => e.id === extraId)) {
-        console.log('  ➕ Agregando extra de producto:', extra.name);
         availableExtras.push(extra);
       }
     });
@@ -1679,17 +1598,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Extras de la categoría del producto
     if (product.categoryId) {
       const categoryExtraIds = categoryExtras.get(product.categoryId) || [];
-      console.log('📂 [getAvailableExtrasForProduct] IDs de extras de categoría:', categoryExtraIds);
       categoryExtraIds.forEach(extraId => {
         const extra = extras.find(e => e.id === extraId && e.active);
         if (extra && !availableExtras.find(e => e.id === extraId)) {
-          console.log('  ➕ Agregando extra de categoría:', extra.name);
           availableExtras.push(extra);
         }
       });
     }
 
-    console.log('✅ [getAvailableExtrasForProduct] Total de extras disponibles:', availableExtras.map(e => e.name));
     return availableExtras;
   };
 

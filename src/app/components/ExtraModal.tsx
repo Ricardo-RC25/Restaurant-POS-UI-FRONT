@@ -34,14 +34,6 @@ export function ExtraModal({ extra, onClose, onSave }: ExtraModalProps) {
 
   useEffect(() => {
     if (extra) {
-      console.log('📝 [ExtraModal] Cargando extra para editar:', {
-        id: extra.id,
-        name: extra.name,
-        applicationType: extra.applicationType,
-        categoryIds: extra.categoryIds,
-        productIds: extra.productIds,
-      });
-
       setFormData({
         name: extra.name,
         description: extra.description || '',
@@ -119,8 +111,6 @@ export function ExtraModal({ extra, onClose, onSave }: ExtraModalProps) {
         categoryIds: formData.categoryIds,
         productIds: formData.productIds,
       };
-
-      console.log('💾 [ExtraModal] Guardando extra:', dataToSave);
 
       onSave(dataToSave);
     }

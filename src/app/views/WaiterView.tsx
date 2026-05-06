@@ -84,20 +84,11 @@ export function WaiterView() {
 
   const checkExtrasAndAddToOrder = async (item: MenuItem) => {
     try {
-      console.log('🔍 [DEBUG] Consultando extras para producto:', {
-        id: item.id,
-        name: item.name,
-        category: item.category
-      });
-
       // Llamar a la API para obtener extras disponibles para este producto
       const availableExtras = await getAvailableExtrasForProduct(item.id);
-      
-      console.log('✅ [DEBUG] Extras disponibles desde API:', availableExtras);
 
       // Si no hay extras disponibles, agregar directamente sin mostrar modal
       if (availableExtras.length === 0) {
-        console.log('➡️ No hay extras disponibles, agregando directamente');
         const existingItemIndex = orderItems.findIndex(
           (orderItem) => orderItem.id === item.id && !orderItem.extras?.length && !orderItem.notes
         );
@@ -114,7 +105,6 @@ export function WaiterView() {
         return;
       }
 
-      console.log('✅ Hay', availableExtras.length, 'extras disponibles, mostrando modal');
       // Si hay extras disponibles, mostrar modal
       setPendingItem(item);
       setShowExtrasModal(true);

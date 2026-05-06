@@ -14,13 +14,6 @@ export function Dashboard() {
 
   const handleApplyFilters = () => {
     // In a real application, this would trigger data fetching
-    console.log("Applying filters:", {
-      filterType: selectedFilterType,
-      device: selectedDevice,
-      devices: selectedDevices,
-      dataMode,
-      selectedDay,
-    });
   };
 
   const handleFilterTypeChange = (type: "device" | "virtual-group") => {

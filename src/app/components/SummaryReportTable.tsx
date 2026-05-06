@@ -104,13 +104,10 @@ export function SummaryReportTable({ data, deviceName }: SummaryReportTableProps
 
   const handleExport = async (format: 'excel' | 'pdf') => {
     setIsExporting(true);
-    
+
     // Simulate export process
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // In a real application, you would generate and download the file here
-    console.log(`Exporting ${format.toUpperCase()} report for ${deviceName}`);
-    
+
     setIsExporting(false);
   };
 
