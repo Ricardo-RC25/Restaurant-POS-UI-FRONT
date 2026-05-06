@@ -302,50 +302,7 @@ const loadInvoiceBannerSettings = (): InvoiceBannerSettings => {
   return DEFAULT_INVOICE_BANNER;
 };
 
-const loadExtras = (): Extra[] => {
-  const stored = localStorage.getItem('pos_extras');
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored);
-      return parsed.map((extra: any) => ({
-        ...extra,
-        createdAt: extra.createdAt ? new Date(extra.createdAt) : new Date(),
-      }));
-    } catch (error) {
-      console.error('Error loading extras:', error);
-      return [];
-    }
-  }
-  return [];
-};
-
-const loadCategoryExtras = (): Map<string, string[]> => {
-  const stored = localStorage.getItem('pos_category_extras');
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored);
-      return new Map(Object.entries(parsed));
-    } catch (error) {
-      console.error('Error loading category extras:', error);
-      return new Map();
-    }
-  }
-  return new Map();
-};
-
-const loadProductExtras = (): Map<string, string[]> => {
-  const stored = localStorage.getItem('pos_product_extras');
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored);
-      return new Map(Object.entries(parsed));
-    } catch (error) {
-      console.error('Error loading product extras:', error);
-      return new Map();
-    }
-  }
-  return new Map();
-};
+// Los extras ya NO se cargan desde localStorage, solo desde la API
 
 // ============================================================================
 // COMPONENTE PROVIDER
@@ -363,9 +320,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [cashRegisters, setCashRegisters] = useState<CashRegister[]>(loadCashRegisters);
   const [accessibility, setAccessibility] = useState<AccessibilitySettings>(DEFAULT_ACCESSIBILITY);
   const [invoiceBanner, setInvoiceBanner] = useState<InvoiceBannerSettings>(loadInvoiceBannerSettings());
-  const [extras, setExtras] = useState<Extra[]>(loadExtras);
-  const [categoryExtras, setCategoryExtras] = useState<Map<string, string[]>>(loadCategoryExtras);
-  const [productExtras, setProductExtras] = useState<Map<string, string[]>>(loadProductExtras);
+  const [extras, setExtras] = useState<Extra[]>([]);
+  const [categoryExtras, setCategoryExtras] = useState<Map<string, string[]>>(new Map());
+  const [productExtras, setProductExtras] = useState<Map<string, string[]>>(new Map());
 
   // Cargar mesas desde la API al iniciar
   useEffect(() => {
@@ -520,6 +477,69 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [categories]);
 
+  // Cargar extras desde la API al iniciar
+  useEffect(() => {
+    const fetchExtras = async () => {
+      try {
+        console.log('🔄 [AppContext] Cargando extras desde API...');
+
+        const apiExtras = await extrasService.getExtras();
+
+        // Mapear datos de la API al formato del frontend
+        const mappedExtras: Extra[] = apiExtras.map(extra => ({
+          id: extra.id,
+          name: extra.name,
+          description: extra.description || '',
+          price: parseFloat(extra.price),
+          applicationType: extra.application_type,
+          active: extra.active === 1,
+          createdAt: new Date(extra.created_at),
+        }));
+
+        setExtras(mappedExtras);
+
+        // Reconstruir Maps de relaciones
+        const newCategoryExtras = new Map<string, string[]>();
+        const newProductExtras = new Map<string, string[]>();
+
+        apiExtras.forEach(extra => {
+          // Relaciones con categorías
+          if (extra.categories && extra.categories.length > 0) {
+            extra.categories.forEach((categoryId: string) => {
+              const current = newCategoryExtras.get(categoryId) || [];
+              if (!current.includes(extra.id)) {
+                newCategoryExtras.set(categoryId, [...current, extra.id]);
+              }
+            });
+          }
+
+          // Relaciones con productos
+          if (extra.products && extra.products.length > 0) {
+            extra.products.forEach((productId: string) => {
+              const current = newProductExtras.get(productId) || [];
+              if (!current.includes(extra.id)) {
+                newProductExtras.set(productId, [...current, extra.id]);
+              }
+            });
+          }
+        });
+
+        setCategoryExtras(newCategoryExtras);
+        setProductExtras(newProductExtras);
+
+        console.log('✅ [AppContext] Extras cargados desde API:', {
+          totalExtras: mappedExtras.length,
+          categoryExtras: newCategoryExtras.size,
+          productExtras: newProductExtras.size,
+        });
+      } catch (error) {
+        console.error('❌ [AppContext] Error al cargar extras desde API:', error);
+      }
+    };
+
+    fetchExtras();
+  }, []);
+
   // Load accessibility settings when user changes
   useEffect(() => {
     const settings = loadAccessibilitySettings(currentUser);
@@ -595,22 +615,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('pos_cash_registers', JSON.stringify(cashRegisters));
   }, [cashRegisters]);
 
-  // Persistir extras
-  useEffect(() => {
-    localStorage.setItem('pos_extras', JSON.stringify(extras));
-  }, [extras]);
-
-  // Persistir category extras
-  useEffect(() => {
-    const obj = Object.fromEntries(categoryExtras);
-    localStorage.setItem('pos_category_extras', JSON.stringify(obj));
-  }, [categoryExtras]);
-
-  // Persistir product extras
-  useEffect(() => {
-    const obj = Object.fromEntries(productExtras);
-    localStorage.setItem('pos_product_extras', JSON.stringify(obj));
-  }, [productExtras]);
+  // Los extras ya NO se guardan en localStorage, solo vienen desde la API
 
   // Verificar stock bajo
   useEffect(() => {
@@ -1627,12 +1632,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setCategoryExtras(newCategoryExtras);
       setProductExtras(newProductExtras);
 
-      // Guardar en localStorage
-      localStorage.setItem('pos_extras', JSON.stringify(mappedExtras));
-      localStorage.setItem('pos_category_extras', JSON.stringify(Object.fromEntries(newCategoryExtras)));
-      localStorage.setItem('pos_product_extras', JSON.stringify(Object.fromEntries(newProductExtras)));
-
-      console.log('✅ [reloadExtrasFromAPI] Extras recargados:', {
+      console.log('✅ [reloadExtrasFromAPI] Extras recargados desde API:', {
         totalExtras: mappedExtras.length,
         categoryExtras: newCategoryExtras.size,
         productExtras: newProductExtras.size,
