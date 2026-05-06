@@ -18,6 +18,7 @@ import {
 import { InvoiceController } from '../controllers/InvoiceController';
 import { Invoice, FiscalData, Ticket, TicketItem } from '../types/invoice';
 import { toast } from 'sonner';
+import { isValidPrice, PRICE_ERROR_MESSAGE } from '../utils/priceValidation';
 
 interface CreateInvoiceModalProps {
   onClose: () => void;
@@ -72,9 +73,14 @@ export function CreateInvoiceModal({ onClose, onSuccess }: CreateInvoiceModalPro
 
   const handleValidateTicket = () => {
     const total = parseFloat(ticketTotal);
-    
+
     if (!ticketNumber || !ticketDate || isNaN(total)) {
       toast.error('Por favor completa todos los campos correctamente');
+      return;
+    }
+
+    if (!isValidPrice(total)) {
+      toast.error(PRICE_ERROR_MESSAGE);
       return;
     }
 
@@ -160,6 +166,11 @@ export function CreateInvoiceModal({ onClose, onSuccess }: CreateInvoiceModalPro
 
     if (!currentItem.description || isNaN(quantity) || isNaN(unitPrice)) {
       toast.error('Por favor completa todos los campos del producto');
+      return;
+    }
+
+    if (!isValidPrice(unitPrice)) {
+      toast.error(`Precio unitario: ${PRICE_ERROR_MESSAGE}`);
       return;
     }
 
