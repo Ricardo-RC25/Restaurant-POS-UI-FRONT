@@ -7,6 +7,7 @@ import { usersService } from '../services/usersService';
 import { authService } from '../services/authService';
 import { categoriesService } from '../services/categoriesService';
 import { menuItemsService } from '../services/menuItemsService';
+import { extrasService } from '../services/extrasService';
 
 export interface AccessibilitySettings {
   darkMode: boolean;
@@ -1434,180 +1435,215 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return { total, count, byCash, byCard, byMobile };
   };
 
-  const addExtra = (extra: Extra & { categoryIds?: string[]; productIds?: string[] }) => {
-    const newExtraId = extra.id || Date.now().toString();
-    const newExtra = { ...extra, id: newExtraId };
+  const addExtra = async (extra: Omit<Extra, 'id' | 'createdAt'> & { categoryIds?: string[]; productIds?: string[] }) => {
+    try {
+      let categories: string[] = [];
+      let products: string[] = [];
 
-    console.log('➕ [addExtra] Agregando extra:', {
-      id: newExtraId,
-      name: extra.name,
-      applicationType: extra.applicationType,
-      categoryIds: extra.categoryIds,
-      productIds: extra.productIds,
-    });
+      // Determinar qué enviar según application_type
+      if (extra.applicationType === 'category') {
+        // ✅ CORRECTO: Enviar IDs directamente
+        categories = extra.categoryIds || [];
+        products = [];
+      } else if (extra.applicationType === 'product') {
+        categories = [];
+        products = extra.productIds || [];
+      } else {
+        // Global
+        categories = [];
+        products = [];
+      }
 
-    setExtras([...extras, newExtra]);
-
-    // Actualizar relaciones con categorías
-    if (extra.categoryIds && extra.categoryIds.length > 0) {
-      const newCategoryExtras = new Map(categoryExtras);
-      extra.categoryIds.forEach(categoryId => {
-        const current = newCategoryExtras.get(categoryId) || [];
-        if (!current.includes(newExtraId)) {
-          newCategoryExtras.set(categoryId, [...current, newExtraId]);
-        }
-      });
-      console.log('📂 [addExtra] Actualizando categoryExtras:', Object.fromEntries(newCategoryExtras));
-      setCategoryExtras(newCategoryExtras);
-    }
-
-    // Actualizar relaciones con productos
-    if (extra.productIds && extra.productIds.length > 0) {
-      const newProductExtras = new Map(productExtras);
-      extra.productIds.forEach(productId => {
-        const current = newProductExtras.get(productId) || [];
-        if (!current.includes(newExtraId)) {
-          newProductExtras.set(productId, [...current, newExtraId]);
-        }
-      });
-      console.log('📦 [addExtra] Actualizando productExtras:', Object.fromEntries(newProductExtras));
-      setProductExtras(newProductExtras);
-    }
-
-    toast.success(`Extra ${extra.name} agregado`);
-
-    if (currentUser) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'create',
-        module: 'inventory',
-        entityType: 'extra',
-        entityId: newExtraId,
-        details: `Tipo: ${extra.applicationType}, Precio: $${extra.price}`,
-      });
-    }
-  };
-
-  const updateExtra = (id: string, updates: Partial<Extra> & { categoryIds?: string[]; productIds?: string[] }) => {
-    const extra = extras.find(e => e.id === id);
-
-    console.log('✏️ [updateExtra] Actualizando extra:', {
-      id,
-      name: updates.name || extra?.name,
-      applicationType: updates.applicationType,
-      categoryIds: updates.categoryIds,
-      productIds: updates.productIds,
-    });
-
-    setExtras(extras.map(extra =>
-      extra.id === id ? { ...extra, ...updates } : extra
-    ));
-
-    // Actualizar relaciones con categorías
-    if (updates.categoryIds !== undefined) {
-      const newCategoryExtras = new Map(categoryExtras);
-
-      // Remover el extra de todas las categorías que ya no lo tienen
-      categoryExtras.forEach((extraIds, categoryId) => {
-        if (!updates.categoryIds!.includes(categoryId)) {
-          newCategoryExtras.set(
-            categoryId,
-            extraIds.filter(extraId => extraId !== id)
-          );
-        }
+      console.log('📡 [addExtra] Enviando a API:', {
+        name: extra.name,
+        application_type: extra.applicationType,
+        categories,  // ✅ IDs
+        products,    // ✅ IDs
       });
 
-      // Agregar el extra a las nuevas categorías
-      updates.categoryIds.forEach(categoryId => {
-        const current = newCategoryExtras.get(categoryId) || [];
-        if (!current.includes(id)) {
-          newCategoryExtras.set(categoryId, [...current, id]);
-        }
+      await extrasService.createExtra({
+        name: extra.name,
+        description: extra.description,
+        price: extra.price,
+        application_type: extra.applicationType,
+        active: extra.active,
+        categories,  // ✅ Array de category IDs
+        products,    // ✅ Array de product IDs
       });
 
-      setCategoryExtras(newCategoryExtras);
-    }
+      // Recargar desde API
+      await reloadExtrasFromAPI();
+      toast.success(`Extra ${extra.name} agregado`);
 
-    // Actualizar relaciones con productos
-    if (updates.productIds !== undefined) {
-      const newProductExtras = new Map(productExtras);
-
-      // Remover el extra de todos los productos que ya no lo tienen
-      productExtras.forEach((extraIds, productId) => {
-        if (!updates.productIds!.includes(productId)) {
-          newProductExtras.set(
-            productId,
-            extraIds.filter(extraId => extraId !== id)
-          );
-        }
-      });
-
-      // Agregar el extra a los nuevos productos
-      updates.productIds.forEach(productId => {
-        const current = newProductExtras.get(productId) || [];
-        if (!current.includes(id)) {
-          newProductExtras.set(productId, [...current, id]);
-        }
-      });
-
-      setProductExtras(newProductExtras);
-    }
-
-    toast.success('Extra actualizado');
-
-    if (currentUser && extra) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'update',
-        module: 'inventory',
-        entityType: 'extra',
-        entityId: id,
-        details: Object.keys(updates).join(', '),
-      });
+      if (currentUser) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'create',
+          module: 'inventory',
+          entityType: 'extra',
+          entityId: 'created',
+          details: `Tipo: ${extra.applicationType}, Precio: $${extra.price}`,
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error al crear extra:', error);
+      toast.error('Error al crear el extra. Intenta nuevamente.');
     }
   };
 
-  const deleteExtra = (id: string) => {
-    const extra = extras.find(e => e.id === id);
-    setExtras(extras.filter(extra => extra.id !== id));
+  const updateExtra = async (id: string, updates: Partial<Extra> & { categoryIds?: string[]; productIds?: string[] }) => {
+    try {
+      let categories: string[] = [];
+      let products: string[] = [];
 
-    // Eliminar relaciones con categorías
-    const newCategoryExtras = new Map(categoryExtras);
-    categoryExtras.forEach((extraIds, categoryId) => {
-      newCategoryExtras.set(
-        categoryId,
-        extraIds.filter(extraId => extraId !== id)
-      );
-    });
-    setCategoryExtras(newCategoryExtras);
+      // Determinar qué enviar según application_type
+      if (updates.applicationType === 'category') {
+        // ✅ CORRECTO: Enviar IDs directamente
+        categories = updates.categoryIds || [];
+        products = [];
+      } else if (updates.applicationType === 'product') {
+        categories = [];
+        products = updates.productIds || [];
+      } else if (updates.applicationType === 'global') {
+        // Global
+        categories = [];
+        products = [];
+      }
 
-    // Eliminar relaciones con productos
-    const newProductExtras = new Map(productExtras);
-    productExtras.forEach((extraIds, productId) => {
-      newProductExtras.set(
-        productId,
-        extraIds.filter(extraId => extraId !== id)
-      );
-    });
-    setProductExtras(newProductExtras);
-
-    toast.success('Extra eliminado');
-
-    if (currentUser && extra) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'delete',
-        module: 'inventory',
-        entityType: 'extra',
-        entityId: id,
-        details: `Extra: ${extra.name}`,
+      console.log('📡 [updateExtra] Enviando a API:', {
+        id,
+        name: updates.name,
+        application_type: updates.applicationType,
+        categories,  // ✅ IDs
+        products,    // ✅ IDs
       });
+
+      await extrasService.updateExtra(id, {
+        name: updates.name,
+        description: updates.description,
+        price: updates.price,
+        application_type: updates.applicationType,
+        active: updates.active,
+        categories,  // ✅ Array de category IDs
+        products,    // ✅ Array de product IDs
+      });
+
+      // Recargar desde API
+      await reloadExtrasFromAPI();
+      toast.success('Extra actualizado');
+
+      if (currentUser) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'update',
+          module: 'inventory',
+          entityType: 'extra',
+          entityId: id,
+          details: Object.keys(updates).join(', '),
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error al actualizar extra:', error);
+      toast.error('Error al actualizar el extra. Intenta nuevamente.');
+    }
+  };
+
+  const deleteExtra = async (id: string) => {
+    try {
+      const extra = extras.find(e => e.id === id);
+
+      console.log('🗑️ [deleteExtra] Eliminando extra:', id);
+
+      await extrasService.deleteExtra(id);
+
+      // Recargar desde API
+      await reloadExtrasFromAPI();
+      toast.success('Extra eliminado');
+
+      if (currentUser && extra) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'delete',
+          module: 'inventory',
+          entityType: 'extra',
+          entityId: id,
+          details: `Extra: ${extra.name}`,
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error al eliminar extra:', error);
+      toast.error('Error al eliminar el extra. Intenta nuevamente.');
+    }
+  };
+
+  const reloadExtrasFromAPI = async () => {
+    try {
+      console.log('🔄 [reloadExtrasFromAPI] Recargando extras desde API...');
+
+      const apiExtras = await extrasService.getExtras();
+
+      // Mapear datos de la API al formato del frontend
+      const mappedExtras: Extra[] = apiExtras.map(extra => ({
+        id: extra.id,
+        name: extra.name,
+        description: extra.description || '',
+        price: parseFloat(extra.price),
+        applicationType: extra.application_type,
+        active: extra.active === 1,
+        createdAt: new Date(extra.created_at),
+      }));
+
+      setExtras(mappedExtras);
+
+      // Reconstruir Maps de relaciones
+      const newCategoryExtras = new Map<string, string[]>();
+      const newProductExtras = new Map<string, string[]>();
+
+      apiExtras.forEach(extra => {
+        // Relaciones con categorías
+        if (extra.categories && extra.categories.length > 0) {
+          extra.categories.forEach((categoryId: string) => {
+            const current = newCategoryExtras.get(categoryId) || [];
+            if (!current.includes(extra.id)) {
+              newCategoryExtras.set(categoryId, [...current, extra.id]);
+            }
+          });
+        }
+
+        // Relaciones con productos
+        if (extra.products && extra.products.length > 0) {
+          extra.products.forEach((productId: string) => {
+            const current = newProductExtras.get(productId) || [];
+            if (!current.includes(extra.id)) {
+              newProductExtras.set(productId, [...current, extra.id]);
+            }
+          });
+        }
+      });
+
+      setCategoryExtras(newCategoryExtras);
+      setProductExtras(newProductExtras);
+
+      // Guardar en localStorage
+      localStorage.setItem('pos_extras', JSON.stringify(mappedExtras));
+      localStorage.setItem('pos_category_extras', JSON.stringify(Object.fromEntries(newCategoryExtras)));
+      localStorage.setItem('pos_product_extras', JSON.stringify(Object.fromEntries(newProductExtras)));
+
+      console.log('✅ [reloadExtrasFromAPI] Extras recargados:', {
+        totalExtras: mappedExtras.length,
+        categoryExtras: newCategoryExtras.size,
+        productExtras: newProductExtras.size,
+      });
+
+    } catch (error) {
+      console.error('❌ [reloadExtrasFromAPI] Error:', error);
+      throw error;
     }
   };
 
