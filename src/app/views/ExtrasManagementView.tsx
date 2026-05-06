@@ -83,11 +83,13 @@ export function ExtrasManagementView() {
     } else {
       // Crear nuevo extra
       await addExtra({
+        id: Date.now().toString(),
         name: extraData.name,
         description: extraData.description || '',
         price: extraData.price,
         applicationType: extraData.applicationType,
         active: extraData.active !== false,
+        createdAt: new Date(),
         categoryIds: extraData.categoryIds || [],
         productIds: extraData.productIds || [],
       });
