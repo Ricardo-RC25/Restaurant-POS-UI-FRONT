@@ -74,7 +74,7 @@ interface AppContextType {
   invoiceBanner: InvoiceBannerSettings;
   updateInvoiceBanner: (settings: Partial<InvoiceBannerSettings>) => void;
   addMenuItem: (item: Omit<MenuItem, 'id' | 'createdAt'>) => Promise<void>;
-  updateMenuItem: (id: string, updates: Partial<MenuItem>) => void;
+  updateMenuItem: (id: string, updates: Partial<MenuItem>) => Promise<void>;
   deleteMenuItem: (id: string) => void;
   addOrder: (order: Order) => void;
   updateOrder: (id: string, updates: Partial<Order>) => void;
@@ -753,24 +753,60 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updateMenuItem = (id: string, updates: Partial<MenuItem>) => {
+  const updateMenuItem = async (id: string, updates: Partial<MenuItem>) => {
     const item = menuItems.find(i => i.id === id);
-    setMenuItems(menuItems.map(item =>
-      item.id === id ? { ...item, ...updates } : item
-    ));
-    toast.success('Producto actualizado');
 
-    if (currentUser && item) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'update',
-        module: 'inventory',
-        entityType: 'product',
-        entityId: id,
-        details: Object.keys(updates).join(', '),
-      });
+    if (!item) {
+      toast.error('Producto no encontrado');
+      return;
+    }
+
+    try {
+      // Combinar el estado actual con las actualizaciones
+      const updatedItem = { ...item, ...updates };
+
+      // Enviar TODOS los campos a la API para evitar valores NULL
+      const apiData: any = {
+        name: updatedItem.name,
+        description: updatedItem.description,
+        category_id: updatedItem.categoryId,
+        price_provider: updatedItem.priceProvider,
+        price_client: updatedItem.priceClient,
+        stock: updatedItem.stock,
+        min_stock: updatedItem.minStock,
+      };
+
+      // Si hay un archivo de imagen nuevo, incluirlo
+      if (updates.imageFile) {
+        apiData.image = updates.imageFile;
+      }
+
+      await menuItemsService.updateMenuItem(id, apiData);
+
+      setMenuItems(menuItems.map(item =>
+        item.id === id ? updatedItem : item
+      ));
+      toast.success('Producto actualizado');
+
+      if (currentUser) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'update',
+          module: 'inventory',
+          entityType: 'product',
+          entityId: id,
+          details: Object.keys(updates).join(', '),
+        });
+      }
+    } catch (error) {
+      console.error('Error al actualizar producto:', error);
+      toast.error('Error al actualizar el producto. Intenta nuevamente.');
+      // Aún así actualizar el estado local
+      setMenuItems(menuItems.map(item =>
+        item.id === id ? { ...item, ...updates } : item
+      ));
     }
   };
 

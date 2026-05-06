@@ -125,17 +125,19 @@ export function InventoryView() {
     }
 
     if (editingItem) {
-      updateMenuItem(editingItem.id, {
+      await updateMenuItem(editingItem.id, {
         name: formData.name,
         description: formData.description,
         priceProvider: parseFloat(formData.priceProvider),
         priceClient: parseFloat(formData.priceClient),
+        category: categories.find(c => c.id === formData.categoryId)?.name || '',
         categoryId: formData.categoryId, // 🔥 Guardar ID en lugar de nombre
         stock: parseInt(formData.stock),
         minStock: parseInt(formData.minStock),
         unit: formData.unit,
         active: formData.active,
         imageUrl: formData.imageUrl,
+        imageFile: imageFile || undefined, // 🔥 Incluir archivo si hay uno nuevo
       });
       // No mostrar toast aquí - se muestra en el context después de llamar a la API
     } else {
