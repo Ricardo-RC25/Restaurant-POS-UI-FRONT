@@ -353,8 +353,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>(loadMenuItems);
   const [categories, setCategories] = useState<Category[]>(loadCategories);
   const [orders, setOrders] = useState<Order[]>(loadOrders);
-  const [tables, setTables] = useState<Table[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [tables, setTables] = useState<Table[]>(loadTablesFromLocalStorage);
+  const [users, setUsers] = useState<User[]>(loadUsersFromLocalStorage);
   const [currentUser, setCurrentUser] = useState<User | null>(loadCurrentUser);
   const [notifications, setNotifications] = useState<Notification[]>(loadNotifications);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(loadAuditLogs);
