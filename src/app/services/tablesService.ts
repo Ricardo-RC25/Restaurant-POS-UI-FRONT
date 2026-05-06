@@ -18,15 +18,11 @@ interface DeleteTableResponse {
   message: string;
 }
 
-interface UpdateTableRequest {
-  number?: number;
-  capacity?: number;
-  status?: 'free' | 'occupied' | 'billed';
-  waiter_id?: string | null;
-  occupied_at?: string | null;
+interface UpdateTableNumberRequest {
+  number: number;
 }
 
-interface UpdateTableResponse {
+interface UpdateTableNumberResponse {
   message: string;
 }
 
@@ -62,12 +58,12 @@ export const tablesService = {
   },
 
   /**
-   * Actualizar una mesa
+   * Actualizar el número de una mesa
    */
-  async updateTable(id: string, data: UpdateTableRequest): Promise<UpdateTableResponse> {
-    console.log('📡 [API] Actualizando mesa:', { id, data });
-    const response = await apiClient.put<UpdateTableResponse>(`/tables/${id}`, data);
-    console.log('✅ [API] Mesa actualizada:', response);
+  async updateTableNumber(id: string, newNumber: number): Promise<UpdateTableNumberResponse> {
+    console.log('📡 [API] Actualizando número de mesa:', { id, newNumber });
+    const response = await apiClient.patch<UpdateTableNumberResponse>(`/tables/${id}/number`, { number: newNumber });
+    console.log('✅ [API] Número de mesa actualizado:', response);
     return response;
   },
 

@@ -36,9 +36,14 @@ export const apiClient = {
   },
 
   async get<T>(endpoint: string): Promise<T> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    // Agregar timestamp para evitar cache
+    const separator = endpoint.includes('?') ? '&' : '?';
+    const url = `${API_BASE_URL}${endpoint}${separator}_t=${Date.now()}`;
+
+    const response = await fetch(url, {
       method: 'GET',
       headers: getHeaders(),
+      cache: 'no-cache', // Forzar no usar cache del navegador
     });
 
     if (!response.ok) {
@@ -51,6 +56,20 @@ export const apiClient = {
   async put<T>(endpoint: string, data: any): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  },
+
+  async patch<T>(endpoint: string, data: any): Promise<T> {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'PATCH',
       headers: getHeaders(),
       body: JSON.stringify(data),
     });

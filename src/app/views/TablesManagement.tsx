@@ -18,8 +18,8 @@ import { DeleteConfirmationModal } from '../components/DeleteConfirmationModal';
 
 export function TablesManagement() {
   // Context
-  const { tables, addTable, updateTable, deleteTable } = useApp();
-  
+  const { tables, addTable, updateTableNumber, deleteTable } = useApp();
+
   // Estados
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddTableModal, setShowAddTableModal] = useState(false);
@@ -66,7 +66,7 @@ export function TablesManagement() {
         toast.error(`La mesa ${newNumber} ya existe`);
         return;
       }
-      await updateTable(tableId, { number: newNumber });
+      await updateTableNumber(tableId, newNumber);
       toast.success(`Mesa ${oldNumber} actualizada a Mesa ${newNumber}`);
     }
     setShowEditTableModal(false);
