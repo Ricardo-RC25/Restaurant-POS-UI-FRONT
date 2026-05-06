@@ -615,15 +615,15 @@ export function WaiterView() {
                                 {item.extras && item.extras.length > 0 ? (
                                   <div className="flex flex-wrap gap-1 mt-1">
                                     {item.extras.map((extra, i) => (
-                                      <span key={`extra-${idx}-${i}`} className="text-xs bg-surface px-2 py-0.5 rounded border border-border text-muted-foreground">
-                                        {typeof extra === 'string' ? extra : String(extra)}
+                                      <span key={`extra-${idx}-${i}`} className="text-xs bg-blue-50 dark:bg-blue-950/30 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300">
+                                        + {extra.name} {extra.price > 0 ? `(${formatCurrency(extra.price)})` : ''}
                                       </span>
                                     ))}
                                   </div>
                                 ) : null}
                               </div>
                               <span className="text-foreground font-semibold ml-2">
-                                ${(item.priceClient * item.quantity).toFixed(2)}
+                                {formatCurrency((item.priceClient + (item.extras?.reduce((sum, e) => sum + e.price, 0) || 0)) * item.quantity)}
                               </span>
                             </div>
                           ))}

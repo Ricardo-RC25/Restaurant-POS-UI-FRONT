@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PageHeader } from '../components/PageHeader';
 import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
 import { Switch } from '../components/ui/switch';
 import { InvoiceBannerEditor } from '../components/InvoiceBannerEditor';
 import { 
@@ -461,12 +459,12 @@ export function SettingsView() {
                         <span>O ingresa una URL de imagen</span>
                       </summary>
                       <div className="mt-2">
-                        <Input
+                        <input
                           type="url"
                           value={tempBusinessInfo.logoUrl}
                           onChange={(e) => setTempBusinessInfo({ ...tempBusinessInfo, logoUrl: e.target.value })}
                           placeholder="https://ejemplo.com/logo.png"
-                          className="text-sm"
+                          className="w-full px-4 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-background text-card-foreground text-sm"
                         />
                       </div>
                     </details>
@@ -475,91 +473,97 @@ export function SettingsView() {
 
                 {/* Nombre del Negocio */}
                 <div>
-                  <Label htmlFor="businessName" className="flex items-center gap-2 mb-2">
+                  <label htmlFor="businessName" className="flex items-center gap-2 mb-2 text-sm font-semibold text-card-foreground">
                     <Store className="w-4 h-4 text-primary" />
                     Nombre del Negocio
-                  </Label>
-                  <Input
+                  </label>
+                  <input
                     id="businessName"
                     type="text"
                     value={tempBusinessInfo.name}
                     onChange={(e) => setTempBusinessInfo({ ...tempBusinessInfo, name: e.target.value })}
                     placeholder="Taquería POS"
+                    className="w-full px-4 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-background text-card-foreground"
                   />
                 </div>
 
                 {/* Eslogan */}
                 <div>
-                  <Label htmlFor="slogan" className="flex items-center gap-2 mb-2">
+                  <label htmlFor="slogan" className="flex items-center gap-2 mb-2 text-sm font-semibold text-card-foreground">
                     <Type className="w-4 h-4 text-primary" />
                     Eslogan
-                  </Label>
-                  <Input
+                  </label>
+                  <input
                     id="slogan"
                     type="text"
                     value={tempBusinessInfo.slogan}
                     onChange={(e) => setTempBusinessInfo({ ...tempBusinessInfo, slogan: e.target.value })}
                     placeholder="Los mejores tacos de la ciudad"
+                    className="w-full px-4 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-background text-card-foreground"
                   />
                 </div>
 
                 {/* Dirección */}
                 <div>
-                  <Label htmlFor="address" className="flex items-center gap-2 mb-2">
+                  <label htmlFor="address" className="flex items-center gap-2 mb-2 text-sm font-semibold text-card-foreground">
                     <MapPin className="w-4 h-4 text-primary" />
                     Dirección
-                  </Label>
-                  <Input
+                  </label>
+                  <input
                     id="address"
                     type="text"
                     value={tempBusinessInfo.address}
                     onChange={(e) => setTempBusinessInfo({ ...tempBusinessInfo, address: e.target.value })}
                     placeholder="Calle Principal #123, Col. Centro"
+                    className="w-full px-4 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-background text-card-foreground"
                   />
                 </div>
 
                 {/* Teléfono */}
                 <div>
-                  <Label htmlFor="phone" className="flex items-center gap-2 mb-2">
+                  <label htmlFor="phone" className="flex items-center gap-2 mb-2 text-sm font-semibold text-card-foreground">
                     <Phone className="w-4 h-4 text-primary" />
                     Teléfono
-                  </Label>
-                  <Input
+                  </label>
+                  <input
                     id="phone"
                     type="tel"
                     value={tempBusinessInfo.phone}
                     onChange={(e) => setTempBusinessInfo({ ...tempBusinessInfo, phone: e.target.value })}
                     placeholder="+52 55 1234 5678"
+                    className="w-full px-4 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-background text-card-foreground"
                   />
                 </div>
 
                 {/* Email */}
                 <div>
-                  <Label htmlFor="email" className="flex items-center gap-2 mb-2">
+                  <label htmlFor="email" className="flex items-center gap-2 mb-2 text-sm font-semibold text-card-foreground">
                     <Mail className="w-4 h-4 text-primary" />
                     Correo Electrónico
-                  </Label>
-                  <Input
+                  </label>
+                  <input
                     id="email"
                     type="email"
                     value={tempBusinessInfo.email}
                     onChange={(e) => setTempBusinessInfo({ ...tempBusinessInfo, email: e.target.value })}
                     placeholder="contacto@taqueria.com"
+                    className="w-full px-4 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-background text-card-foreground"
                   />
                 </div>
 
                 {/* Sitio Web */}
                 <div>
-                  <Label htmlFor="website" className="flex items-center gap-2 mb-2">
+                  <label htmlFor="website" className="flex items-center gap-2 mb-2 text-sm font-semibold text-card-foreground">
                     <Globe className="w-4 h-4 text-primary" />
                     Sitio Web
-                  </Label>
-                  <Input
+                  </label>
+                  <input
                     id="website"
                     type="text"
                     value={tempBusinessInfo.website}
                     onChange={(e) => setTempBusinessInfo({ ...tempBusinessInfo, website: e.target.value })}
                     placeholder="www.taqueria.com"
+                    className="w-full px-4 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-background text-card-foreground"
                   />
                 </div>
 
@@ -572,16 +576,16 @@ export function SettingsView() {
             </div>
 
             {/* Modal Footer */}
-            <div className="border-t border-border p-4 flex gap-3 bg-muted/30 flex-shrink-0">
+            <div className="border-t border-border p-6 flex gap-3 flex-shrink-0">
               <button
                 onClick={handleCancelEdit}
-                className="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                className="flex-1 px-4 py-3 bg-muted text-card-foreground rounded-xl font-medium hover:bg-muted/80 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSaveBusiness}
-                className="flex-1 px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 shadow-md"
               >
                 <Check className="w-5 h-5" />
                 Guardar

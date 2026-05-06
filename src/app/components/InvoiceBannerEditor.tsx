@@ -155,7 +155,7 @@ export function InvoiceBannerEditor({ onClose }: InvoiceBannerEditorProps) {
           <div className="space-y-6">
             {/* System Name */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-semibold text-card-foreground mb-2">
                 <Type className="inline w-4 h-4 mr-1" />
                 Nombre del Sistema *
               </label>
@@ -164,13 +164,13 @@ export function InvoiceBannerEditor({ onClose }: InvoiceBannerEditorProps) {
                 value={formData.systemName}
                 onChange={(e) => setFormData({ ...formData, systemName: e.target.value })}
                 placeholder="Ej: La Taquería"
-                className="w-full px-4 py-2.5 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground"
+                className="w-full px-4 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-background text-card-foreground"
               />
             </div>
 
             {/* Slogan */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-semibold text-card-foreground mb-2">
                 <Type className="inline w-4 h-4 mr-1" />
                 Slogan *
               </label>
@@ -179,13 +179,13 @@ export function InvoiceBannerEditor({ onClose }: InvoiceBannerEditorProps) {
                 value={formData.slogan}
                 onChange={(e) => setFormData({ ...formData, slogan: e.target.value })}
                 placeholder="Ej: La Mejor Taquería de la Ciudad"
-                className="w-full px-4 py-2.5 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground"
+                className="w-full px-4 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-background text-card-foreground"
               />
             </div>
 
             {/* Message */}
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-semibold text-card-foreground mb-2">
                 Mensaje Publicitario
               </label>
               <textarea
@@ -193,14 +193,14 @@ export function InvoiceBannerEditor({ onClose }: InvoiceBannerEditorProps) {
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                 placeholder="Ej: Disfruta nuestros auténticos tacos..."
                 rows={3}
-                className="w-full px-4 py-2.5 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground resize-none"
+                className="w-full px-4 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-background text-card-foreground resize-none"
               />
             </div>
 
             {/* Colors */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <label className="block text-sm font-semibold text-card-foreground mb-2">
                   <Palette className="inline w-4 h-4 mr-1" />
                   Color de Fondo
                 </label>
@@ -209,18 +209,18 @@ export function InvoiceBannerEditor({ onClose }: InvoiceBannerEditorProps) {
                     type="color"
                     value={formData.backgroundColor}
                     onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
-                    className="w-12 h-10 rounded border border-input cursor-pointer"
+                    className="w-12 h-12 rounded-xl border-2 border-border cursor-pointer"
                   />
                   <input
                     type="text"
                     value={formData.backgroundColor}
                     onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
-                    className="flex-1 px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground"
+                    className="flex-1 px-4 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-background text-card-foreground"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <label className="block text-sm font-semibold text-card-foreground mb-2">
                   <Palette className="inline w-4 h-4 mr-1" />
                   Color de Texto
                 </label>
@@ -229,13 +229,13 @@ export function InvoiceBannerEditor({ onClose }: InvoiceBannerEditorProps) {
                     type="color"
                     value={formData.textColor}
                     onChange={(e) => setFormData({ ...formData, textColor: e.target.value })}
-                    className="w-12 h-10 rounded border border-input cursor-pointer"
+                    className="w-12 h-12 rounded-xl border-2 border-border cursor-pointer"
                   />
                   <input
                     type="text"
                     value={formData.textColor}
                     onChange={(e) => setFormData({ ...formData, textColor: e.target.value })}
-                    className="flex-1 px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground"
+                    className="flex-1 px-4 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-background text-card-foreground"
                   />
                 </div>
               </div>
@@ -244,12 +244,12 @@ export function InvoiceBannerEditor({ onClose }: InvoiceBannerEditorProps) {
             {/* Products */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <label className="block text-sm font-medium text-foreground">
+                <label className="block text-sm font-semibold text-card-foreground">
                   Productos Publicitarios
                 </label>
                 <button
                   onClick={handleAddProduct}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-[#a2774c] dark:bg-[#c8956b] text-white rounded-lg hover:bg-[#6c5033] dark:hover:bg-[#a2774c] transition-colors text-sm"
+                  className="flex items-center gap-2 px-3 py-2 bg-[#a2774c] dark:bg-[#c8956b] text-white rounded-xl hover:bg-[#6c5033] dark:hover:bg-[#a2774c] transition-colors text-sm font-medium shadow-sm"
                 >
                   <Plus className="w-4 h-4" />
                   Agregar Producto
@@ -258,7 +258,7 @@ export function InvoiceBannerEditor({ onClose }: InvoiceBannerEditorProps) {
 
               <div className="space-y-3">
                 {formData.products.map((product) => (
-                  <div key={product.id} className="border border-border rounded-lg p-4 bg-muted/30">
+                  <div key={product.id} className="border-2 border-border rounded-xl p-4 bg-muted/30">
                     {/* Nombre y Precio */}
                     <div className="grid grid-cols-2 gap-3 mb-3">
                       <input
@@ -266,14 +266,14 @@ export function InvoiceBannerEditor({ onClose }: InvoiceBannerEditorProps) {
                         value={product.name}
                         onChange={(e) => handleUpdateProduct(product.id, 'name', e.target.value)}
                         placeholder="Nombre del producto"
-                        className="px-4 py-2.5 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground"
+                        className="px-4 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-background text-card-foreground"
                       />
                       <input
                         type="text"
                         value={product.price}
                         onChange={(e) => handleUpdateProduct(product.id, 'price', e.target.value)}
                         placeholder="Precio (Ej: 5 piezas $125)"
-                        className="px-4 py-2.5 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground"
+                        className="px-4 py-3 border-2 border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary bg-background text-card-foreground"
                       />
                     </div>
 
@@ -352,7 +352,7 @@ export function InvoiceBannerEditor({ onClose }: InvoiceBannerEditorProps) {
                     {/* Botón Eliminar Producto */}
                     <button
                       onClick={() => handleRemoveProduct(product.id)}
-                      className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-sm"
+                      className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-sm font-medium"
                     >
                       <Trash2 className="w-4 h-4" />
                       Eliminar Producto
@@ -370,16 +370,16 @@ export function InvoiceBannerEditor({ onClose }: InvoiceBannerEditorProps) {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-border p-4 bg-muted/30 flex gap-3">
+        <div className="border-t border-border p-6 flex gap-3 flex-shrink-0">
           <button
             onClick={onClose}
-            className="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            className="flex-1 px-4 py-3 bg-muted text-card-foreground rounded-xl font-medium hover:bg-muted/80 transition-colors"
           >
             Cancelar
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 px-6 py-3 bg-[#2e636e] dark:bg-[#3d7a89] text-white rounded-lg font-medium hover:bg-[#a2774c] dark:hover:bg-[#c8956b] transition-colors flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-3 bg-[#2e636e] dark:bg-[#3d7a89] text-white rounded-xl font-medium hover:bg-[#a2774c] dark:hover:bg-[#c8956b] transition-colors flex items-center justify-center gap-2 shadow-md"
           >
             <Check className="w-5 h-5" />
             Guardar Cambios

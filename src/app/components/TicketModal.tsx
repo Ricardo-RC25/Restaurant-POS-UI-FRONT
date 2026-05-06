@@ -9,7 +9,12 @@ interface TicketModalProps {
 }
 
 export function TicketModal({ order, onClose }: TicketModalProps) {
-  const subtotal = order.items.reduce((sum, item) => sum + item.priceClient * item.quantity, 0);
+  // Calcular subtotal incluyendo extras
+  const subtotal = order.items.reduce((sum, item) => {
+    const itemPrice = item.priceClient;
+    const extrasPrice = item.extras?.reduce((extraSum, extra) => extraSum + extra.price, 0) || 0;
+    return sum + ((itemPrice + extrasPrice) * item.quantity);
+  }, 0);
   const tax = subtotal * 0.08;
 
   // Obtener información del negocio
@@ -107,24 +112,41 @@ export function TicketModal({ order, onClose }: TicketModalProps) {
           {/* Items */}
           <div className="border-b border-border pb-4">
             <h4 className="font-semibold text-card-foreground mb-3">Productos</h4>
-            <div className="space-y-2">
-              {order.items.map((item, index) => (
-                <div key={index} className="flex justify-between text-sm">
-                  <div className="flex-1">
-                    <p className="text-card-foreground">
-                      {item.quantity}x {item.name}
-                    </p>
-                    {item.notes ? (
-                      <p className="text-xs text-muted-foreground italic ml-4">
-                        Nota: {item.notes}
-                      </p>
-                    ) : null}
+            <div className="space-y-3">
+              {order.items.map((item, index) => {
+                const itemTotal = item.priceClient * item.quantity;
+                const extrasTotal = (item.extras?.reduce((sum, extra) => sum + extra.price, 0) || 0) * item.quantity;
+                const lineTotal = itemTotal + extrasTotal;
+
+                return (
+                  <div key={index} className="text-sm">
+                    <div className="flex justify-between">
+                      <div className="flex-1">
+                        <p className="text-card-foreground font-medium">
+                          {item.quantity}x {item.name}
+                        </p>
+                        {item.extras && item.extras.length > 0 ? (
+                          <div className="ml-4 mt-1 space-y-0.5">
+                            {item.extras.map((extra, idx) => (
+                              <p key={idx} className="text-xs text-muted-foreground">
+                                + {extra.name} {extra.price > 0 ? `(${formatCurrency(extra.price)})` : ''}
+                              </p>
+                            ))}
+                          </div>
+                        ) : null}
+                        {item.notes ? (
+                          <p className="text-xs text-muted-foreground italic ml-4 mt-1">
+                            Nota: {item.notes}
+                          </p>
+                        ) : null}
+                      </div>
+                      <span className="text-card-foreground font-medium ml-4">
+                        {formatCurrency(lineTotal)}
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-card-foreground font-medium ml-4">
-                    {formatCurrency(item.priceClient * item.quantity)}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
