@@ -75,7 +75,7 @@ interface AppContextType {
   updateInvoiceBanner: (settings: Partial<InvoiceBannerSettings>) => void;
   addMenuItem: (item: Omit<MenuItem, 'id' | 'createdAt'>) => Promise<void>;
   updateMenuItem: (id: string, updates: Partial<MenuItem>) => Promise<void>;
-  deleteMenuItem: (id: string) => void;
+  deleteMenuItem: (id: string) => Promise<void>;
   addOrder: (order: Order) => void;
   updateOrder: (id: string, updates: Partial<Order>) => void;
   deleteOrder: (id: string) => void;
@@ -810,22 +810,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const deleteMenuItem = (id: string) => {
+  const deleteMenuItem = async (id: string) => {
     const item = menuItems.find(i => i.id === id);
-    setMenuItems(menuItems.filter(item => item.id !== id));
-    toast.success('Producto eliminado');
 
-    if (currentUser && item) {
-      addAuditLog({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userRole: currentUser.role,
-        action: 'delete',
-        module: 'inventory',
-        entityType: 'product',
-        entityId: id,
-        details: `Producto: ${item.name}`,
-      });
+    try {
+      await menuItemsService.deleteMenuItem(id);
+      setMenuItems(menuItems.filter(item => item.id !== id));
+      toast.success('Producto eliminado');
+
+      if (currentUser && item) {
+        addAuditLog({
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userRole: currentUser.role,
+          action: 'delete',
+          module: 'inventory',
+          entityType: 'product',
+          entityId: id,
+          details: `Producto: ${item.name}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error al eliminar producto:', error);
+      toast.error('Error al eliminar el producto. Intenta nuevamente.');
     }
   };
 

@@ -580,9 +580,9 @@ export function InventoryView() {
           message="¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer."
           itemName={itemToDelete.name}
           onClose={() => setShowDeleteModal(false)}
-          onConfirm={() => {
+          onConfirm={async () => {
             if (itemToDelete) {
-              deleteMenuItem(itemToDelete.id);
+              await deleteMenuItem(itemToDelete.id);
               // No mostrar toast aquí - se muestra en el context después de llamar a la API
             }
             setShowDeleteModal(false);
