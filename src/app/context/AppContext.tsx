@@ -904,12 +904,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.log('📤 [updateTable] Enviando a API:', apiData);
       await tablesService.updateTable(id, apiData);
 
-      // Actualizar estado local usando el ID
-      setTables(tables.map(t =>
-        t.id === id ? updatedTable : t
-      ));
+      // Recargar todas las mesas desde la API para asegurar sincronización
+      console.log('🔄 [updateTable] Recargando mesas desde API...');
+      const apiTables = await tablesService.getTables();
 
-      console.log('✅ [updateTable] Mesa actualizada exitosamente');
+      const mappedTables: Table[] = apiTables.map(table => ({
+        id: table.id,
+        number: table.number,
+        status: table.status,
+        capacity: 4,
+        currentOrder: null,
+        currentOrderId: table.current_order_id,
+        waiterId: table.waiter_id,
+        waiterName: undefined,
+        occupiedAt: table.occupied_at ? new Date(table.occupied_at) : undefined,
+      }));
+
+      setTables(mappedTables);
+      localStorage.setItem('pos_tables', JSON.stringify(mappedTables));
+
+      console.log('✅ [updateTable] Mesa actualizada y recargada desde API');
     } catch (error) {
       console.error('❌ [updateTable] Error al actualizar mesa:', error);
       // Aún así actualizar el estado local para estados temporales
@@ -929,14 +943,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
         status: table.status,
       });
 
-      // Crear el objeto de mesa con el ID del backend
-      const newTable: Table = {
-        ...table,
-        id: response.tableId,
-      };
+      // Recargar todas las mesas desde la API para asegurar sincronización
+      console.log('🔄 [addTable] Recargando mesas desde API...');
+      const apiTables = await tablesService.getTables();
 
-      // Actualizar el estado local
-      setTables([...tables, newTable]);
+      const mappedTables: Table[] = apiTables.map(table => ({
+        id: table.id,
+        number: table.number,
+        status: table.status,
+        capacity: 4,
+        currentOrder: null,
+        currentOrderId: table.current_order_id,
+        waiterId: table.waiter_id,
+        waiterName: undefined,
+        occupiedAt: table.occupied_at ? new Date(table.occupied_at) : undefined,
+      }));
+
+      setTables(mappedTables);
+      localStorage.setItem('pos_tables', JSON.stringify(mappedTables));
       toast.success(`Mesa ${table.number} creada`);
 
       if (currentUser) {
@@ -947,12 +971,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           action: 'create',
           module: 'tables',
           entityType: 'table',
-          entityId: newTable.id,
+          entityId: response.tableId,
           details: `Mesa ${table.number} - Capacidad: ${table.capacity}`,
         });
       }
 
-      console.log('✅ [addTable] Mesa creada exitosamente:', newTable);
+      console.log('✅ [addTable] Mesa creada y recargada desde API');
     } catch (error) {
       console.error('❌ [addTable] Error al crear mesa:', error);
       toast.error('Error al crear la mesa. Intenta nuevamente.');
@@ -969,8 +993,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Llamar a la API para eliminar la mesa
       await tablesService.deleteTable(id);
 
-      // Actualizar el estado local
-      setTables(tables.filter(t => t.id !== id));
+      // Recargar todas las mesas desde la API para asegurar sincronización
+      console.log('🔄 [deleteTable] Recargando mesas desde API...');
+      const apiTables = await tablesService.getTables();
+
+      const mappedTables: Table[] = apiTables.map(table => ({
+        id: table.id,
+        number: table.number,
+        status: table.status,
+        capacity: 4,
+        currentOrder: null,
+        currentOrderId: table.current_order_id,
+        waiterId: table.waiter_id,
+        waiterName: undefined,
+        occupiedAt: table.occupied_at ? new Date(table.occupied_at) : undefined,
+      }));
+
+      setTables(mappedTables);
+      localStorage.setItem('pos_tables', JSON.stringify(mappedTables));
       toast.success(`Mesa ${table?.number} eliminada`);
 
       if (currentUser && table) {
@@ -986,7 +1026,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         });
       }
 
-      console.log('✅ [deleteTable] Mesa eliminada exitosamente');
+      console.log('✅ [deleteTable] Mesa eliminada y recargada desde API');
     } catch (error) {
       console.error('❌ [deleteTable] Error al eliminar mesa:', error);
       toast.error('Error al eliminar la mesa. Intenta nuevamente.');
