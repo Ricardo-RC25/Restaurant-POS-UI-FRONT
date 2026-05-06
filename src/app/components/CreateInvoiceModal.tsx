@@ -398,7 +398,8 @@ export function CreateInvoiceModal({ onClose, onSuccess }: CreateInvoiceModalPro
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                     <input
                       type="number"
-                      step="0.01"
+                      step="0.50"
+                      min="0"
                       value={ticketTotal}
                       onChange={(e) => setTicketTotal(e.target.value)}
                       placeholder="0.00"
@@ -482,7 +483,8 @@ export function CreateInvoiceModal({ onClose, onSuccess }: CreateInvoiceModalPro
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                       <input
                         type="number"
-                        step="0.01"
+                        step="0.50"
+                        min="0"
                         value={currentItem.unitPrice}
                         onChange={(e) => setCurrentItem({ ...currentItem, unitPrice: e.target.value })}
                         placeholder="0.00"

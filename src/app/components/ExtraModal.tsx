@@ -9,6 +9,7 @@ import { DollarSign, Package, Tag } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { FormModal } from './FormModal';
 import { FormField, InputField, TextAreaField, CheckboxField } from './FormField';
+import { isValidPrice, PRICE_ERROR_MESSAGE } from '../utils/priceValidation';
 
 interface ExtraModalProps {
   extra: any;
@@ -81,6 +82,8 @@ export function ExtraModal({ extra, onClose, onSave }: ExtraModalProps) {
 
     if (formData.price < 0) {
       newErrors.price = 'El precio no puede ser negativo';
+    } else if (formData.price > 0 && !isValidPrice(formData.price)) {
+      newErrors.price = PRICE_ERROR_MESSAGE;
     }
 
     if (!formData.applyToAllProducts) {
@@ -157,11 +160,11 @@ export function ExtraModal({ extra, onClose, onSave }: ExtraModalProps) {
       </FormField>
 
       {/* Precio */}
-      <FormField label="Precio Adicional" required error={errors.price} helpText="Ingresa 0 si el extra es gratuito">
+      <FormField label="Precio Adicional" required error={errors.price} helpText="Ingresa 0 si es gratis. Ej: 5, 10, 4.50, 10.50">
         <InputField
           icon={DollarSign}
           type="number"
-          step="0.01"
+          step="0.50"
           min="0"
           value={formData.price.toString()}
           onChange={(value) => setFormData({ ...formData, price: parseFloat(value) || 0 })}

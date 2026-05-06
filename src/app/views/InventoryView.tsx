@@ -10,6 +10,7 @@ import { PageHeader } from '../components/PageHeader';
 import { SearchBar } from '../components/SearchBar';
 import { ActionButton, IconButton } from '../components/ui/ActionButton';
 import { DeleteConfirmationModal } from '../components/DeleteConfirmationModal';
+import { isValidPrice, PRICE_ERROR_MESSAGE } from '../utils/priceValidation';
 
 import { MenuItem } from '../types';
 
@@ -121,6 +122,20 @@ export function InventoryView() {
     // 🔥 Validar que se haya seleccionado una categoría
     if (!formData.categoryId) {
       toast.error('Por favor selecciona una categoría');
+      return;
+    }
+
+    // 🔥 Validar precios (múltiplos de 0.50)
+    const priceProvider = parseFloat(formData.priceProvider);
+    const priceClient = parseFloat(formData.priceClient);
+
+    if (!isValidPrice(priceProvider)) {
+      toast.error(`Precio Proveedor: ${PRICE_ERROR_MESSAGE}`);
+      return;
+    }
+
+    if (!isValidPrice(priceClient)) {
+      toast.error(`Precio Cliente: ${PRICE_ERROR_MESSAGE}`);
       return;
     }
 
@@ -367,7 +382,8 @@ export function InventoryView() {
                       <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="number"
-                        step="0.01"
+                        step="0.50"
+                        min="0"
                         value={formData.priceProvider}
                         onChange={(e) => setFormData({ ...formData, priceProvider: e.target.value })}
                         placeholder="0.00"
@@ -375,6 +391,7 @@ export function InventoryView() {
                         required
                       />
                     </div>
+                    <p className="text-xs text-muted-foreground mt-1">Ej: 50, 100, 4.50, 10.50</p>
                   </div>
 
                   {/* Precio al Cliente */}
@@ -386,7 +403,8 @@ export function InventoryView() {
                       <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="number"
-                        step="0.01"
+                        step="0.50"
+                        min="0"
                         value={formData.priceClient}
                         onChange={(e) => setFormData({ ...formData, priceClient: e.target.value })}
                         placeholder="0.00"
@@ -394,6 +412,7 @@ export function InventoryView() {
                         required
                       />
                     </div>
+                    <p className="text-xs text-muted-foreground mt-1">Ej: 50, 100, 4.50, 10.50</p>
                   </div>
 
                   {/* Categoría */}

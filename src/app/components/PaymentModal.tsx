@@ -116,7 +116,8 @@ export const PaymentModal = memo(function PaymentModal({ order, onClose, onPay }
                 onChange={(e) => setAmountReceived(e.target.value)}
                 placeholder="0.00"
                 className="w-full px-4 py-2 border-2 border-border bg-card text-card-foreground rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                step="0.01"
+                step="0.50"
+                min="0"
               />
               {change > 0 && (
                 <p className="mt-2 text-sm text-muted-foreground">
