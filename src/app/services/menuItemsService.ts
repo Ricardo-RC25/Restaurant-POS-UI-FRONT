@@ -2,25 +2,7 @@
  * Menu Items API Service
  */
 
-const API_BASE_URL = 'http://localhost:3000/api';
-
-/**
- * Obtener headers con token de autenticación si está disponible
- */
-const getHeaders = (includeContentType: boolean = true): HeadersInit => {
-  const headers: HeadersInit = {};
-
-  if (includeContentType) {
-    headers['Content-Type'] = 'application/json';
-  }
-
-  const token = localStorage.getItem('auth_token');
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  return headers;
-};
+import { apiClient } from './api';
 
 interface CreateMenuItemRequest {
   name: string;
@@ -89,27 +71,14 @@ export const menuItemsService = {
    * Obtener todos los productos
    */
   async getMenuItems(): Promise<MenuItemApiResponse[]> {
-    console.log('📡 [API] Obteniendo todos los productos');
-    const response = await fetch(`${API_BASE_URL}/menu-items`, {
-      method: 'GET',
-      headers: getHeaders(),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    console.log('✅ [API] Productos obtenidos:', data);
-    return data;
+    const response = await apiClient.get<MenuItemApiResponse[]>('/menu-items');
+    return response;
   },
 
   /**
    * Crear un nuevo producto (con FormData para soportar imagen)
    */
   async createMenuItem(data: CreateMenuItemRequest): Promise<CreateMenuItemResponse> {
-    console.log('📡 [API] Creando producto:', { ...data, image: data.image ? 'FILE' : null });
-
     const formData = new FormData();
     formData.append('name', data.name);
     formData.append('description', data.description);
@@ -123,27 +92,14 @@ export const menuItemsService = {
       formData.append('image', data.image);
     }
 
-    const response = await fetch(`${API_BASE_URL}/menu-items`, {
-      method: 'POST',
-      headers: getHeaders(false), // No incluir Content-Type para FormData
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
-
-    const result = await response.json();
-    console.log('✅ [API] Producto creado:', result);
-    return result;
+    const response = await apiClient.postFormData<CreateMenuItemResponse>('/menu-items', formData);
+    return response;
   },
 
   /**
    * Actualizar un producto (con FormData para soportar imagen)
    */
   async updateMenuItem(id: string, data: UpdateMenuItemRequest): Promise<UpdateMenuItemResponse> {
-    console.log('📡 [API] Actualizando producto:', { id, data: { ...data, image: data.image ? 'FILE' : null } });
-
     const formData = new FormData();
 
     if (data.name !== undefined) formData.append('name', data.name);
@@ -156,37 +112,15 @@ export const menuItemsService = {
     if (data.active !== undefined) formData.append('active', data.active.toString());
     if (data.image) formData.append('image', data.image);
 
-    const response = await fetch(`${API_BASE_URL}/menu-items/${id}`, {
-      method: 'PUT',
-      headers: getHeaders(false), // No incluir Content-Type para FormData
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
-
-    const result = await response.json();
-    console.log('✅ [API] Producto actualizado:', result);
-    return result;
+    const response = await apiClient.putFormData<UpdateMenuItemResponse>(`/menu-items/${id}`, formData);
+    return response;
   },
 
   /**
    * Eliminar un producto
    */
   async deleteMenuItem(id: string): Promise<DeleteMenuItemResponse> {
-    console.log('📡 [API] Eliminando producto:', id);
-    const response = await fetch(`${API_BASE_URL}/menu-items/${id}`, {
-      method: 'DELETE',
-      headers: getHeaders(),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
-
-    const result = await response.json();
-    console.log('✅ [API] Producto eliminado:', result);
-    return result;
+    const response = await apiClient.delete<DeleteMenuItemResponse>(`/menu-items/${id}`);
+    return response;
   },
 };

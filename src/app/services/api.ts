@@ -7,10 +7,12 @@ const API_BASE_URL = 'http://localhost:3000/api';
 /**
  * Obtener headers con token de autenticación si está disponible
  */
-const getHeaders = (): HeadersInit => {
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
+const getHeaders = (includeContentType: boolean = true): HeadersInit => {
+  const headers: HeadersInit = {};
+
+  if (includeContentType) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   const token = localStorage.getItem('auth_token');
   if (token) {
@@ -85,6 +87,34 @@ export const apiClient = {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'DELETE',
       headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  },
+
+  async postFormData<T>(endpoint: string, formData: FormData): Promise<T> {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers: getHeaders(false),
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  },
+
+  async putFormData<T>(endpoint: string, formData: FormData): Promise<T> {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'PUT',
+      headers: getHeaders(false),
+      body: formData,
     });
 
     if (!response.ok) {
