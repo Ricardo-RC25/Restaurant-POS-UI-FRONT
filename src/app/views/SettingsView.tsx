@@ -265,9 +265,9 @@ export function SettingsView() {
                     <Sun className="w-5 h-5 text-card-foreground" />
                   )}
                   <div>
-                    <Label htmlFor="dark-mode" className="text-base font-medium text-card-foreground cursor-pointer">
+                    <label htmlFor="dark-mode" className="text-base font-medium text-card-foreground cursor-pointer">
                       Modo Nocturno
-                    </Label>
+                    </label>
                     <p className="text-sm text-muted-foreground">
                       Reduce el brillo de la pantalla en ambientes oscuros
                     </p>
@@ -285,9 +285,9 @@ export function SettingsView() {
                 <div className="flex items-center gap-3">
                   <Zap className="w-5 h-5 text-card-foreground" />
                   <div>
-                    <Label htmlFor="reduced-motion" className="text-base font-medium text-card-foreground cursor-pointer">
+                    <label htmlFor="reduced-motion" className="text-base font-medium text-card-foreground cursor-pointer">
                       Reducir Movimiento
-                    </Label>
+                    </label>
                     <p className="text-sm text-muted-foreground">
                       Minimiza animaciones y transiciones
                     </p>
@@ -369,10 +369,10 @@ export function SettingsView() {
               <div className="space-y-5">
                 {/* Logo del Negocio */}
                 <div>
-                  <Label className="flex items-center gap-2 mb-3">
+                  <label className="flex items-center gap-2 mb-3 text-sm font-semibold text-card-foreground">
                     <ImageIcon className="w-4 h-4 text-primary" />
                     Logo del Negocio
-                  </Label>
+                  </label>
                   
                   {/* Vista previa del logo actual */}
                   {tempBusinessInfo.logoUrl && (
