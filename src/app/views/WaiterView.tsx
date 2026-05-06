@@ -205,12 +205,15 @@ export function WaiterView() {
     addOrder(newOrder);
 
     // Marcar la mesa como ocupada cuando se crea la orden
-    await updateTable(selectedTable, {
-      status: 'occupied',
-      waiterId: currentUser?.id,
-      currentOrderId: newOrder.id,
-      occupiedAt: new Date()
-    });
+    const table = tables.find(t => t.number === selectedTable);
+    if (table) {
+      await updateTable(table.id, {
+        status: 'occupied',
+        waiterId: currentUser?.id,
+        currentOrderId: newOrder.id,
+        occupiedAt: new Date()
+      });
+    }
 
     toast.success('Orden registrada y lista para entregar');
 
@@ -296,12 +299,15 @@ export function WaiterView() {
     });
 
     // Liberar la mesa
-    await updateTable(order.tableNumber, {
-      status: 'free',
-      waiterId: null,
-      currentOrderId: null,
-      occupiedAt: null
-    });
+    const table = tables.find(t => t.number === order.tableNumber);
+    if (table) {
+      await updateTable(table.id, {
+        status: 'free',
+        waiterId: null,
+        currentOrderId: null,
+        occupiedAt: null
+      });
+    }
 
     toast.success(`Orden cobrada - Mesa ${order.tableNumber} liberada`);
     setShowPaymentModal(false);
@@ -362,7 +368,10 @@ export function WaiterView() {
                       setShowMenu(false);
                       setShowMobileOrder(false);
                       if (selectedTable && orderItems.length === 0) {
-                        await updateTable(selectedTable, { status: 'free', waiterId: null });
+                        const table = tables.find(t => t.number === selectedTable);
+                        if (table) {
+                          await updateTable(table.id, { status: 'free', waiterId: null });
+                        }
                       }
                     }}
                     className="bg-card p-2 rounded-lg shadow-sm hover:bg-muted border border-border"
@@ -462,7 +471,10 @@ export function WaiterView() {
                         setShowMenu(false);
                         setShowMobileOrder(false);
                         if (selectedTable && orderItems.length === 0) {
-                          await updateTable(selectedTable, { status: 'free', waiterId: null });
+                          const table = tables.find(t => t.number === selectedTable);
+                          if (table) {
+                            await updateTable(table.id, { status: 'free', waiterId: null });
+                          }
                         }
                       }}
                       className="bg-card p-2 rounded-lg shadow-sm hover:bg-muted border border-border"

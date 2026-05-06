@@ -3,11 +3,12 @@ import { X, Check } from 'lucide-react';
 
 interface EditTableModalProps {
   table: {
+    id: string;
     number: number;
     status: string;
   };
   onClose: () => void;
-  onSave: (tableNumber: number, newNumber: number) => void;
+  onSave: (tableId: string, oldNumber: number, newNumber: number) => void;
 }
 
 export function EditTableModal({ table, onClose, onSave }: EditTableModalProps) {
@@ -15,7 +16,7 @@ export function EditTableModal({ table, onClose, onSave }: EditTableModalProps) 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(table.number, newNumber);
+    onSave(table.id, table.number, newNumber);
   };
 
   return (

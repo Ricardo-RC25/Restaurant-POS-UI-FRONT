@@ -79,7 +79,7 @@ interface AppContextType {
   addOrder: (order: Order) => void;
   updateOrder: (id: string, updates: Partial<Order>) => void;
   deleteOrder: (id: string) => void;
-  updateTable: (tableNumber: number, updates: Partial<Table>) => Promise<void>;
+  updateTable: (id: string, updates: Partial<Table>) => Promise<void>;
   addTable: (table: Omit<Table, 'id'>) => Promise<void>;
   deleteTable: (id: string) => Promise<void>;
   login: (username: string, password: string) => Promise<boolean>;
@@ -877,15 +877,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setOrders(orders.filter(order => order.id !== id));
   };
 
-  const updateTable = async (tableNumber: number, updates: Partial<Table>) => {
+  const updateTable = async (id: string, updates: Partial<Table>) => {
     try {
-      const table = tables.find(t => t.number === tableNumber);
+      const table = tables.find(t => t.id === id);
       if (!table) {
-        console.error('❌ [updateTable] Mesa no encontrada:', tableNumber);
+        console.error('❌ [updateTable] Mesa no encontrada:', id);
         return;
       }
 
-      console.log('✏️ [updateTable] Actualizando mesa:', { tableNumber, updates });
+      console.log('✏️ [updateTable] Actualizando mesa:', { id, updates });
 
       // Crear el objeto actualizado completo (combinar estado actual con updates)
       const updatedTable = { ...table, ...updates };
@@ -902,11 +902,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       };
 
       console.log('📤 [updateTable] Enviando a API:', apiData);
-      await tablesService.updateTable(table.id, apiData);
+      await tablesService.updateTable(id, apiData);
 
-      // Actualizar estado local
+      // Actualizar estado local usando el ID
       setTables(tables.map(t =>
-        t.number === tableNumber ? updatedTable : t
+        t.id === id ? updatedTable : t
       ));
 
       console.log('✅ [updateTable] Mesa actualizada exitosamente');
@@ -914,7 +914,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.error('❌ [updateTable] Error al actualizar mesa:', error);
       // Aún así actualizar el estado local para estados temporales
       setTables(tables.map(t =>
-        t.number === tableNumber ? { ...t, ...updates } : t
+        t.id === id ? { ...t, ...updates } : t
       ));
     }
   };

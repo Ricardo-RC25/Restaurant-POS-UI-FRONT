@@ -25,7 +25,7 @@ export function TablesManagement() {
   const [showAddTableModal, setShowAddTableModal] = useState(false);
   const [showEditTableModal, setShowEditTableModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedTable, setSelectedTable] = useState<{ number: number; status: string } | null>(null);
+  const [selectedTable, setSelectedTable] = useState<{ id: string; number: number; status: string } | null>(null);
   const [tableToDelete, setTableToDelete] = useState<{ id: string; number: number } | null>(null);
 
   // Estados derivados
@@ -54,19 +54,19 @@ export function TablesManagement() {
     setShowAddTableModal(false);
   };
 
-  const handleEditTable = (table: { number: number; status: string }) => {
+  const handleEditTable = (table: { id: string; number: number; status: string }) => {
     setSelectedTable(table);
     setShowEditTableModal(true);
   };
 
-  const handleSaveEditTable = async (oldNumber: number, newNumber: number) => {
+  const handleSaveEditTable = async (tableId: string, oldNumber: number, newNumber: number) => {
     if (oldNumber !== newNumber) {
       // Verificar que el nuevo número no exista
       if (existingTableNumbers.includes(newNumber)) {
         toast.error(`La mesa ${newNumber} ya existe`);
         return;
       }
-      await updateTable(oldNumber, { number: newNumber });
+      await updateTable(tableId, { number: newNumber });
       toast.success(`Mesa ${oldNumber} actualizada a Mesa ${newNumber}`);
     }
     setShowEditTableModal(false);
@@ -180,7 +180,7 @@ export function TablesManagement() {
                       <div className="flex gap-2">
                         <IconButton
                           icon={Pencil}
-                          onClick={() => handleEditTable({ number: table.number, status: table.status })}
+                          onClick={() => handleEditTable({ id: table.id, number: table.number, status: table.status })}
                           variant="edit"
                           title="Editar"
                         />
