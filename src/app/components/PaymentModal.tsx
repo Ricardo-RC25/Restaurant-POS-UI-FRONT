@@ -1,6 +1,6 @@
 import { useState, useEffect, memo, useCallback } from 'react';
 import { Order, PaymentMethod } from '../types';
-import { CreditCard, Smartphone, Banknote, X, DollarSign } from 'lucide-react';
+import { CreditCard, Banknote, X, DollarSign } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
 
 // ============================================================================
