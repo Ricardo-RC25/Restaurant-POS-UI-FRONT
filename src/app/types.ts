@@ -115,7 +115,7 @@ export interface User {
   name: string;
   email?: string;
   phone?: string;
-  role: 'admin' | 'manager' | 'waiter' | 'cashier';
+  role: 'admin' | 'waiter' | 'cashier';
   active: boolean;
   createdAt: Date;
 }
@@ -136,4 +136,4 @@ export interface AuditLog {
   timestamp: Date;
 }
 
-export type PaymentMethod = 'cash' | 'card' | 'mobile';
+export type PaymentMethod = 'cash' | 'card';

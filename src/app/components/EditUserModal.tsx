@@ -121,7 +121,6 @@ export function EditUserModal({ user, onClose, onSave }: EditUserModalProps) {
               >
                 <option value="waiter">Mesero</option>
                 <option value="cashier">Cajero</option>
-                <option value="manager">Gerente</option>
                 <option value="admin">Administrador</option>
               </select>
             </div>

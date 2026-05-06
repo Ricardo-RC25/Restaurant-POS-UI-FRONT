@@ -91,18 +91,6 @@ export const PaymentModal = memo(function PaymentModal({ order, onClose, onPay }
               </button>
 
               <button
-                onClick={() => handleMethodChange('mobile')}
-                className={`w-full p-3 sm:p-4 rounded-lg border flex items-center gap-3 transition-colors touch-manipulation ${
-                  selectedMethod === 'mobile'
-                    ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/50'
-                    : 'border-border hover:border-primary bg-card'
-                }`}
-              >
-                <Smartphone className="w-5 h-5 sm:w-6 sm:h-6 text-card-foreground" />
-                <span className="font-medium text-card-foreground text-sm sm:text-base">Pago Móvil</span>
-              </button>
-
-              <button
                 onClick={() => handleMethodChange('bank')}
                 className={`w-full p-3 sm:p-4 rounded-lg border flex items-center gap-3 transition-colors touch-manipulation ${
                   selectedMethod === 'bank'

@@ -95,7 +95,7 @@ interface AppContextType {
   updateInventory: (itemId: string, quantity: number) => void;
   cashRegisters: CashRegister[];
   addCashRegister: (cashRegister: Omit<CashRegister, 'id'>) => void;
-  getSalesByPeriod: (period: 'day' | 'week' | 'month') => { total: number; count: number; byCash: number; byCard: number; byMobile: number };
+  getSalesByPeriod: (period: 'day' | 'week' | 'month') => { total: number; count: number; byCash: number; byCard: number };
   extras: Extra[];
   categoryExtras: Map<string, string[]>;
   productExtras: Map<string, string[]>;
@@ -1428,11 +1428,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const byCard = filteredOrders
       .filter(o => o.paymentMethod === 'card')
       .reduce((sum, order) => sum + order.total, 0);
-    const byMobile = filteredOrders
-      .filter(o => o.paymentMethod === 'mobile')
-      .reduce((sum, order) => sum + order.total, 0);
 
-    return { total, count, byCash, byCard, byMobile };
+    return { total, count, byCash, byCard };
   };
 
   const addExtra = async (extra: Omit<Extra, 'id' | 'createdAt'> & { categoryIds?: string[]; productIds?: string[] }) => {

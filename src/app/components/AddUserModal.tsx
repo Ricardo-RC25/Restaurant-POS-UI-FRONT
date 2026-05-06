@@ -10,7 +10,7 @@ interface NewUserData {
   username: string;
   password: string;
   name: string;
-  role: 'admin' | 'manager' | 'waiter' | 'cashier';
+  role: 'admin' | 'waiter' | 'cashier';
 }
 
 interface AddUserModalProps {
@@ -21,7 +21,6 @@ interface AddUserModalProps {
 const ROLE_LABELS = {
   waiter: 'Mesero',
   cashier: 'Cajero',
-  manager: 'Gerente',
   admin: 'Administrador',
 } as const;
 

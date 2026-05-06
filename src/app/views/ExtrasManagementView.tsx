@@ -1,8 +1,8 @@
 /**
  * EXTRAS MANAGEMENT VIEW
- * 
+ *
  * Vista para gestionar extras/modificaciones del menú
- * Solo accesible para rol 'manager'
+ * Solo accesible para rol 'admin'
  */
 
 import { useState } from 'react';

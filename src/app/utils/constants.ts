@@ -6,19 +6,16 @@
 export const PAYMENT_METHODS = {
   CASH: 'cash',
   CARD: 'card',
-  MOBILE: 'mobile',
 } as const;
 
 export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   cash: 'Efectivo',
   card: 'Tarjeta',
-  mobile: 'Pago Móvil',
 };
 
 export const PAYMENT_METHOD_ICONS: Record<string, string> = {
   cash: '💵',
   card: '💳',
-  mobile: '📱',
 };
 
 // Order statuses
@@ -77,14 +74,12 @@ export const TABLE_STATUS_COLORS: Record<string, string> = {
 // User roles
 export const USER_ROLES = {
   ADMIN: 'admin',
-  MANAGER: 'manager',
   WAITER: 'waiter',
   CASHIER: 'cashier',
 } as const;
 
 export const USER_ROLE_LABELS: Record<string, string> = {
   admin: 'Administrador',
-  manager: 'Gerente',
   waiter: 'Mesero',
   cashier: 'Cajero',
 };
