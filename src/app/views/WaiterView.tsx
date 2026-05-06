@@ -10,6 +10,7 @@ import { TicketModal } from '../components/TicketModal';
 import { PageHeader } from '../components/PageHeader';
 import { Search, ChevronLeft, Send, Receipt, Eye, Clock, Edit, CheckCircle, ShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatCurrency } from '../utils/format';
 
 export function WaiterView() {
   const { menuItems, addOrder, updateOrder, tables, updateTable, currentUser, orders, categories: allCategories, updateInventory, getAvailableExtrasForProduct } = useApp();
