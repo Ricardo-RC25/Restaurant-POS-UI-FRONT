@@ -1307,11 +1307,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const deleteCategory = async (id: string) => {
     const category = categories.find(c => c.id === id);
+    const productsToDelete = menuItems.filter(item => item.categoryId === id);
 
     try {
+      // Primero eliminar todos los productos asociados a esta categoría (en la BD)
+      for (const product of productsToDelete) {
+        try {
+          await menuItemsService.deleteMenuItem(product.id);
+        } catch (error) {
+          console.error(`Error al eliminar producto ${product.name}:`, error);
+          throw new Error(`No se pudo eliminar el producto ${product.name}`);
+        }
+      }
+
+      // Actualizar estado local de productos
+      setMenuItems(menuItems.filter(item => item.categoryId !== id));
+
+      // Luego eliminar la categoría (en la BD)
       await categoriesService.deleteCategory(id);
       setCategories(categories.filter(cat => cat.id !== id));
-      toast.success('Categoría eliminada');
+
+      const deletedCount = productsToDelete.length;
+      toast.success(`Categoría eliminada${deletedCount > 0 ? ` junto con ${deletedCount} producto${deletedCount > 1 ? 's' : ''}` : ''}`);
 
       if (currentUser && category) {
         addAuditLog({
@@ -1322,7 +1339,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           module: 'inventory',
           entityType: 'category',
           entityId: id,
-          details: `Categoría eliminada: ${category.name}`,
+          details: `Categoría eliminada: ${category.name}${deletedCount > 0 ? ` (${deletedCount} producto${deletedCount > 1 ? 's' : ''} eliminado${deletedCount > 1 ? 's' : ''})` : ''}`,
         });
       }
     } catch (error) {
