@@ -445,7 +445,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             stock: parseInt(item.stock),
             minStock: parseInt(item.min_stock),
             unit: 'pzs', // Valor por defecto (no viene de la API)
-            imageUrl: item.image ? `http://localhost:3000/uploads/${item.image}` : undefined,
+            imageUrl: item.image ? `https://backpos.thecomputists.com/uploads/${item.image}` : undefined,
             active: item.active === 1,
             createdAt: new Date(item.created_at),
           };
@@ -716,7 +716,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         stock: parseInt(response.item.stock),
         minStock: parseInt(response.item.min_stock),
         unit: item.unit,
-        imageUrl: response.item.image ? `http://localhost:3000/uploads/${response.item.image}` : undefined,
+        imageUrl: response.item.image ? `https://backpos.thecomputists.com/uploads/${response.item.image}` : undefined,
         active: response.item.active,
         createdAt: new Date(),
       };
