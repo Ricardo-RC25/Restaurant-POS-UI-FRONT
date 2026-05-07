@@ -474,7 +474,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const fetchExtras = async () => {
       try {
         const apiExtras = await extrasService.getExtras();
-        console.log('🔍 [DEBUG INICIAL] Extras desde API:', apiExtras);
+        console.log('🔍 [DEBUG INICIAL] Extras desde API:', JSON.stringify(apiExtras, null, 2));
 
         // Mapear datos de la API al formato del frontend
         const mappedExtras: Extra[] = apiExtras.map(extra => ({
@@ -494,12 +494,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const newProductExtras = new Map<string, string[]>();
 
         apiExtras.forEach(extra => {
+          console.log(`🔍 [DEBUG INICIAL] Procesando extra: ${extra.name}`, {
+            id: extra.id,
+            applicationType: extra.application_type,
+            hasCategories: !!extra.categories,
+            categories: extra.categories,
+            hasProducts: !!extra.products,
+            products: extra.products,
+          });
+
           // Relaciones con categorías
           if (extra.categories && extra.categories.length > 0) {
             extra.categories.forEach((categoryId: string) => {
               const current = newCategoryExtras.get(categoryId) || [];
               if (!current.includes(extra.id)) {
                 newCategoryExtras.set(categoryId, [...current, extra.id]);
+                console.log(`  ✅ Extra "${extra.name}" vinculado a categoría ${categoryId}`);
               }
             });
           }
@@ -510,6 +520,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               const current = newProductExtras.get(productId) || [];
               if (!current.includes(extra.id)) {
                 newProductExtras.set(productId, [...current, extra.id]);
+                console.log(`  ✅ Extra "${extra.name}" vinculado a producto ${productId}`);
               }
             });
           }
@@ -517,6 +528,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
         setCategoryExtras(newCategoryExtras);
         setProductExtras(newProductExtras);
+
+        console.log('🔍 [DEBUG INICIAL] Maps construidos:');
+        console.log('  categoryExtras:', JSON.stringify(Array.from(newCategoryExtras.entries()), null, 2));
+        console.log('  productExtras:', JSON.stringify(Array.from(newProductExtras.entries()), null, 2));
       } catch (error) {
         console.error('❌ [AppContext] Error al cargar extras desde API:', error);
       }
@@ -1527,7 +1542,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const reloadExtrasFromAPI = async () => {
     try {
       const apiExtras = await extrasService.getExtras();
-      console.log('🔍 [DEBUG] Extras desde API:', apiExtras);
+      console.log('🔍 [DEBUG] Extras desde API:', JSON.stringify(apiExtras, null, 2));
 
       // Mapear datos de la API al formato del frontend
       const mappedExtras: Extra[] = apiExtras.map(extra => ({
@@ -1547,12 +1562,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const newProductExtras = new Map<string, string[]>();
 
       apiExtras.forEach(extra => {
+        console.log(`🔍 [DEBUG] Procesando extra: ${extra.name}`, {
+          id: extra.id,
+          applicationType: extra.application_type,
+          hasCategories: !!extra.categories,
+          categories: extra.categories,
+          hasProducts: !!extra.products,
+          products: extra.products,
+        });
+
         // Relaciones con categorías
         if (extra.categories && extra.categories.length > 0) {
           extra.categories.forEach((categoryId: string) => {
             const current = newCategoryExtras.get(categoryId) || [];
             if (!current.includes(extra.id)) {
               newCategoryExtras.set(categoryId, [...current, extra.id]);
+              console.log(`  ✅ Extra "${extra.name}" vinculado a categoría ${categoryId}`);
             }
           });
         }
@@ -1563,6 +1588,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             const current = newProductExtras.get(productId) || [];
             if (!current.includes(extra.id)) {
               newProductExtras.set(productId, [...current, extra.id]);
+              console.log(`  ✅ Extra "${extra.name}" vinculado a producto ${productId}`);
             }
           });
         }
@@ -1571,10 +1597,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setCategoryExtras(newCategoryExtras);
       setProductExtras(newProductExtras);
 
-      console.log('🔍 [DEBUG] Maps construidos:', {
-        categoryExtras: Array.from(newCategoryExtras.entries()),
-        productExtras: Array.from(newProductExtras.entries()),
-      });
+      console.log('🔍 [DEBUG] Maps construidos:');
+      console.log('  categoryExtras:', JSON.stringify(Array.from(newCategoryExtras.entries()), null, 2));
+      console.log('  productExtras:', JSON.stringify(Array.from(newProductExtras.entries()), null, 2));
     } catch (error) {
       console.error('❌ [reloadExtrasFromAPI] Error:', error);
       throw error;
