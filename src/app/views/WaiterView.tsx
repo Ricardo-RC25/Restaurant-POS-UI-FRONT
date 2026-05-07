@@ -60,25 +60,7 @@ export function WaiterView() {
   };
 
   const handleAddToOrder = (item: MenuItem) => {
-    // Bebidas y postres se agregan directamente sin modal
-    if (item.category === 'Bebidas' || item.category === 'Postres') {
-      const existingItemIndex = orderItems.findIndex(
-        (orderItem) => orderItem.id === item.id
-      );
-      
-      if (existingItemIndex >= 0) {
-        const updatedItems = [...orderItems];
-        updatedItems[existingItemIndex].quantity += 1;
-        setOrderItems(updatedItems);
-      } else {
-        setOrderItems([...orderItems, { ...item, quantity: 1 }]);
-      }
-      
-      toast.success(item.category === 'Bebidas' ? 'Bebida agregada' : 'Postre agregado');
-      return;
-    }
-
-    // Para otros productos, consultar la API para ver si hay extras disponibles
+    // SIEMPRE verificar si hay extras disponibles
     checkExtrasAndAddToOrder(item);
   };
 

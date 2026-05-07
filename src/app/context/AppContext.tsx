@@ -474,7 +474,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const fetchExtras = async () => {
       try {
         const apiExtras = await extrasService.getExtras();
-        console.log('🔍 [DEBUG INICIAL] Extras desde API:', JSON.stringify(apiExtras, null, 2));
 
         // Mapear datos de la API al formato del frontend
         const mappedExtras: Extra[] = apiExtras.map(extra => ({
@@ -494,22 +493,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const newProductExtras = new Map<string, string[]>();
 
         apiExtras.forEach(extra => {
-          console.log(`🔍 [DEBUG INICIAL] Procesando extra: ${extra.name}`, {
-            id: extra.id,
-            applicationType: extra.application_type,
-            hasCategories: !!extra.categories,
-            categories: extra.categories,
-            hasProducts: !!extra.products,
-            products: extra.products,
-          });
-
           // Relaciones con categorías
           if (extra.categories && extra.categories.length > 0) {
             extra.categories.forEach((categoryId: string) => {
               const current = newCategoryExtras.get(categoryId) || [];
               if (!current.includes(extra.id)) {
                 newCategoryExtras.set(categoryId, [...current, extra.id]);
-                console.log(`  ✅ Extra "${extra.name}" vinculado a categoría ${categoryId}`);
               }
             });
           }
@@ -520,7 +509,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
               const current = newProductExtras.get(productId) || [];
               if (!current.includes(extra.id)) {
                 newProductExtras.set(productId, [...current, extra.id]);
-                console.log(`  ✅ Extra "${extra.name}" vinculado a producto ${productId}`);
               }
             });
           }
@@ -528,10 +516,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
         setCategoryExtras(newCategoryExtras);
         setProductExtras(newProductExtras);
-
-        console.log('🔍 [DEBUG INICIAL] Maps construidos:');
-        console.log('  categoryExtras:', JSON.stringify(Array.from(newCategoryExtras.entries()), null, 2));
-        console.log('  productExtras:', JSON.stringify(Array.from(newProductExtras.entries()), null, 2));
       } catch (error) {
         console.error('❌ [AppContext] Error al cargar extras desde API:', error);
       }
@@ -1542,7 +1526,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const reloadExtrasFromAPI = async () => {
     try {
       const apiExtras = await extrasService.getExtras();
-      console.log('🔍 [DEBUG] Extras desde API:', JSON.stringify(apiExtras, null, 2));
 
       // Mapear datos de la API al formato del frontend
       const mappedExtras: Extra[] = apiExtras.map(extra => ({
@@ -1562,22 +1545,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const newProductExtras = new Map<string, string[]>();
 
       apiExtras.forEach(extra => {
-        console.log(`🔍 [DEBUG] Procesando extra: ${extra.name}`, {
-          id: extra.id,
-          applicationType: extra.application_type,
-          hasCategories: !!extra.categories,
-          categories: extra.categories,
-          hasProducts: !!extra.products,
-          products: extra.products,
-        });
-
         // Relaciones con categorías
         if (extra.categories && extra.categories.length > 0) {
           extra.categories.forEach((categoryId: string) => {
             const current = newCategoryExtras.get(categoryId) || [];
             if (!current.includes(extra.id)) {
               newCategoryExtras.set(categoryId, [...current, extra.id]);
-              console.log(`  ✅ Extra "${extra.name}" vinculado a categoría ${categoryId}`);
             }
           });
         }
@@ -1588,7 +1561,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
             const current = newProductExtras.get(productId) || [];
             if (!current.includes(extra.id)) {
               newProductExtras.set(productId, [...current, extra.id]);
-              console.log(`  ✅ Extra "${extra.name}" vinculado a producto ${productId}`);
             }
           });
         }
@@ -1596,10 +1568,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       setCategoryExtras(newCategoryExtras);
       setProductExtras(newProductExtras);
-
-      console.log('🔍 [DEBUG] Maps construidos:');
-      console.log('  categoryExtras:', JSON.stringify(Array.from(newCategoryExtras.entries()), null, 2));
-      console.log('  productExtras:', JSON.stringify(Array.from(newProductExtras.entries()), null, 2));
     } catch (error) {
       console.error('❌ [reloadExtrasFromAPI] Error:', error);
       throw error;
@@ -1609,33 +1577,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const getAvailableExtrasForProduct = (productId: string): Extra[] => {
     const product = menuItems.find(p => p.id === productId);
     if (!product) {
-      console.log('🔍 [DEBUG getExtras] Producto no encontrado:', productId);
       return [];
     }
-
-    console.log('🔍 [DEBUG getExtras] Buscando extras para producto:', {
-      productId,
-      productName: product.name,
-      categoryId: product.categoryId,
-      totalExtras: extras.length,
-      productExtrasMap: Array.from(productExtras.entries()),
-      categoryExtrasMap: Array.from(categoryExtras.entries()),
-    });
 
     const availableExtras: Extra[] = [];
 
     // Extras globales (aplican a todos los productos)
     const globalExtras = extras.filter(e => e.active && e.applicationType === 'global');
-    console.log('🌍 [DEBUG getExtras] Extras globales encontrados:', globalExtras.length);
     availableExtras.push(...globalExtras);
 
     // Extras específicos del producto
     const productExtraIds = productExtras.get(productId) || [];
-    console.log('📦 [DEBUG getExtras] IDs de extras del producto:', productExtraIds);
     productExtraIds.forEach(extraId => {
       const extra = extras.find(e => e.id === extraId && e.active);
       if (extra && !availableExtras.find(e => e.id === extraId)) {
-        console.log('  ➕ Agregando extra de producto:', extra.name);
         availableExtras.push(extra);
       }
     });
@@ -1643,17 +1598,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Extras de la categoría del producto
     if (product.categoryId) {
       const categoryExtraIds = categoryExtras.get(product.categoryId) || [];
-      console.log('📂 [DEBUG getExtras] IDs de extras de categoría:', categoryExtraIds);
       categoryExtraIds.forEach(extraId => {
         const extra = extras.find(e => e.id === extraId && e.active);
         if (extra && !availableExtras.find(e => e.id === extraId)) {
-          console.log('  ➕ Agregando extra de categoría:', extra.name);
           availableExtras.push(extra);
         }
       });
     }
 
-    console.log('✅ [DEBUG getExtras] Total de extras disponibles:', availableExtras.length, availableExtras.map(e => e.name));
     return availableExtras;
   };
 
